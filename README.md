@@ -47,3 +47,4 @@ MercadoGestor/
 - **v0.1**: modelagem de Categoria, Produto e Movimentação de Estoque.
 - **v0.2**: estrutura inicial Flask + SQLite + página inicial + testes básicos.
 - **v0.3**: modelos Categoria, Produto e MovimentacaoEstoque com restrições (UNIQUE, CHECK, chaves estrangeiras) e testes.
+- **v0.4**: CRUD de categorias (listar, cadastrar, editar, desativar/reativar, busca), menu lateral, mensagens, proteção CSRF.

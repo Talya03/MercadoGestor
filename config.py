@@ -27,3 +27,6 @@ class TestConfig(Config):
 
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    # Nos testes de rotas não precisamos enviar o token CSRF manualmente.
+    # Um teste específico liga a proteção para provar que ela funciona.
+    WTF_CSRF_ENABLED = False

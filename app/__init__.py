@@ -7,7 +7,7 @@ uso normal, outra para testes) com configurações distintas.
 from flask import Flask
 
 from config import Config
-from app.extensions import db
+from app.extensions import csrf, db
 
 
 def create_app(config_class=Config):
@@ -15,10 +15,13 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     db.init_app(app)
+    csrf.init_app(app)
 
     from app import models  # noqa: F401  (registra os modelos no SQLAlchemy)
+    from app.routes.categorias import categorias_bp
     from app.routes.main import main_bp
 
     app.register_blueprint(main_bp)
+    app.register_blueprint(categorias_bp)
 
     return app

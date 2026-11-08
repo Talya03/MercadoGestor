@@ -6,10 +6,13 @@ Isso evita importação circular: qualquer módulo pode fazer
 import sqlite3
 
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
 db = SQLAlchemy()
+# CSRF: protege formulários POST contra requisições forjadas por outros sites.
+csrf = CSRFProtect()
 
 
 @event.listens_for(Engine, "connect")
