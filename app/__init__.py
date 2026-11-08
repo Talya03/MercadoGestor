@@ -20,8 +20,15 @@ def create_app(config_class=Config):
     from app import models  # noqa: F401  (registra os modelos no SQLAlchemy)
     from app.routes.categorias import categorias_bp
     from app.routes.main import main_bp
+    from app.routes.produtos import produtos_bp
+    from app.utils.formatacao import moeda, quantidade
 
     app.register_blueprint(main_bp)
     app.register_blueprint(categorias_bp)
+    app.register_blueprint(produtos_bp)
+
+    # Filtros usados nos templates: {{ preco|moeda }}, {{ saldo|quantidade }}
+    app.add_template_filter(moeda, "moeda")
+    app.add_template_filter(quantidade, "quantidade")
 
     return app

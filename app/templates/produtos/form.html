@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} · MercadoGestor{% endblock %}
+
+{% macro campo(f, ajuda=None) %}
+  <div class="mb-3">
+    {{ f.label(class="form-label") }}
+    {{ f(class=("form-select" if f.type == "SelectField" else "form-control") ~ (" is-invalid" if f.errors else ""), **kwargs) }}
+    {% for erro in f.errors %}<div class="invalid-feedback">{{ erro }}</div>{% endfor %}
+    {% if ajuda %}<div class="form-text">{{ ajuda }}</div>{% endif %}
+  </div>
+{% endmacro %}
+
+{% block content %}
+<h1 class="h3 mb-3">{{ titulo }}</h1>
+
+<div class="card" style="max-width: 720px;">
+  <div class="card-body">
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="row">
+        <div class="col-md-8">{{ campo(form.nome, autofocus=true, maxlength=120) }}</div>
+        <div class="col-md-4">{{ campo(form.codigo, maxlength=50) }}</div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8">{{ campo(form.categoria_id) }}</div>
+        <div class="col-md-4">{{ campo(form.unidade_medida) }}</div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">{{ campo(form.preco_custo) }}</div>
+        <div class="col-md-4">{{ campo(form.preco_venda) }}</div>
+        <div class="col-md-4">{{ campo(form.estoque_minimo, "Abaixo disso, o sistema avisa.") }}</div>
+      </div>
+
+      <div class="alert alert-light border small">
+        {% if produto %}
+          <strong>Estoque atual:</strong>
+          {{ produto.quantidade_estoque|quantidade }} {{ produto.unidade_medida }}.
+          O saldo não é editado aqui: ele muda apenas por entradas, saídas e ajustes
+          registrados no módulo de Estoque.
+        {% else %}
+          O estoque do produto começa em <strong>0</strong>. As entradas de mercadoria
+          serão registradas no módulo de Estoque, com data e motivo.
+        {% endif %}
+      </div>
+
+      <div class="d-flex gap-2">
+        {{ form.submit(class="btn btn-success") }}
+        <a href="{{ url_for('produtos.lista') }}" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -108,3 +108,12 @@ Notação: `||` = exatamente um; `o{` = zero ou muitos.
 - RN06: uma saída maior que o saldo disponível é bloqueada.
 - RN07: produto com `quantidade_estoque <= estoque_minimo` aparece no alerta de estoque baixo.
 - RN08: categorias e produtos são desativados, não excluídos.
+- RN09: não é possível desativar uma categoria que ainda tem produtos ativos.
+- RN10: só se cadastra ou move produto para categoria ativa; não se reativa produto cuja categoria está inativa.
+- RN11: a unidade de medida não pode ser alterada se o produto já tem estoque ou histórico de movimentações.
+- RN12: o saldo de estoque não é editado no cadastro do produto. Começa em 0 e só muda por movimentações (Fase 4).
+- RN13: preço de venda abaixo do custo (ou zerado) é permitido, mas gera um aviso ao dono.
+
+### Convenções de dados
+- Dinheiro: `Decimal`, 2 casas (máx. 99.999.999,99). Quantidades: `Decimal`, 3 casas.
+- Entrada de números no padrão brasileiro (`4,50` ou `1.234,56`). Valores com mais casas decimais que o permitido são recusados, nunca arredondados em silêncio. `NaN`, `Infinity` e notação científica (`1e5`) são recusados.

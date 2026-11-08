@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Produtos · MercadoGestor{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Produtos</h1>
+  <a href="{{ url_for('produtos.novo') }}" class="btn btn-success">+ Novo produto</a>
+</div>
+
+<form method="get" class="row g-2 mb-3 align-items-center">
+  <div class="col-sm-6 col-lg-4">
+    <input type="search" name="q" value="{{ busca }}" class="form-control"
+           placeholder="Buscar por nome ou código..." aria-label="Buscar produto">
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <select name="categoria" class="form-select" aria-label="Filtrar por categoria">
+      <option value="">Todas as categorias</option>
+      {% for c in categorias %}
+        <option value="{{ c.id }}" {{ 'selected' if categoria_id == c.id }}>{{ c.nome }}{{ ' (inativa)' if not c.ativo }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="baixo" value="1" id="baixo"
+             {{ 'checked' if estoque_baixo }}>
+      <label class="form-check-label" for="baixo">Só estoque baixo</label>
+    </div>
+  </div>
+  <div class="col-auto">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="inativos" value="1" id="inativos"
+             {{ 'checked' if incluir_inativos }}>
+      <label class="form-check-label" for="inativos">Mostrar inativos</label>
+    </div>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Código</th>
+          <th>Nome</th>
+          <th>Categoria</th>
+          <th class="text-end">Custo</th>
+          <th class="text-end">Venda</th>
+          <th class="text-end">Estoque</th>
+          <th>Status</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in produtos %}
+        <tr class="{{ 'text-muted' if not p.ativo }}">
+          <td><code>{{ p.codigo }}</code></td>
+          <td class="fw-semibold">{{ p.nome }}</td>
+          <td>{{ p.categoria.nome }}</td>
+          <td class="text-end">{{ p.preco_custo|moeda }}</td>
+          <td class="text-end">{{ p.preco_venda|moeda }}</td>
+          <td class="text-end">
+            {{ p.quantidade_estoque|quantidade }} {{ p.unidade_medida }}
+            {% if p.quantidade_estoque == 0 %}
+              <span class="badge text-bg-danger">Sem estoque</span>
+            {% elif p.estoque_baixo %}
+              <span class="badge text-bg-warning">Baixo</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if p.ativo %}
+              <span class="badge text-bg-success">Ativo</span>
+            {% else %}
+              <span class="badge text-bg-secondary">Inativo</span>
+            {% endif %}
+          </td>
+          <td class="text-end text-nowrap">
+            <a href="{{ url_for('produtos.editar', produto_id=p.id) }}"
+               class="btn btn-sm btn-outline-primary">Editar</a>
+            <form method="post" action="{{ url_for('produtos.alternar', produto_id=p.id) }}"
+                  class="d-inline"
+                  {% if p.ativo %}data-confirmar='Desativar o produto "{{ p.nome }}"?'{% endif %}>
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              {% if p.ativo %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">Desativar</button>
+              {% else %}
+                <button type="submit" class="btn btn-sm btn-outline-success">Reativar</button>
+              {% endif %}
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8" class="text-center text-muted py-4">
+            {% if busca or categoria_id or estoque_baixo %}Nenhum produto encontrado com esses filtros.
+            {% else %}Nenhum produto cadastrado ainda. Comece pelo "+ Novo produto".{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
