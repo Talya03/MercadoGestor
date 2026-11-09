@@ -39,6 +39,14 @@
           <a class="nav-link {{ 'active' if request.blueprint == 'estoque' }}"
              href="{{ url_for('estoque.lista') }}">Estoque</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'fornecedores' }}"
+             href="{{ url_for('fornecedores.lista') }}">Fornecedores</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'compras' }}"
+             href="{{ url_for('compras.lista') }}">Compras</a>
+        </li>
       </ul>
     </aside>
 

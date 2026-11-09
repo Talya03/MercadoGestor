@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Compra #{{ compra.id }} · MercadoGestor{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Compra #{{ compra.id }}</h1>
+  <a href="{{ url_for('compras.lista') }}" class="btn btn-outline-secondary">Voltar</a>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Fornecedor</dt><dd class="col-sm-9">{{ compra.fornecedor.nome }}</dd>
+      <dt class="col-sm-3">Data e hora</dt><dd class="col-sm-9">{{ compra.data_hora|data_hora }}</dd>
+      <dt class="col-sm-3">Nº da nota</dt><dd class="col-sm-9">{{ compra.numero_documento or "—" }}</dd>
+      <dt class="col-sm-3">Observação</dt><dd class="col-sm-9 mb-0">{{ compra.observacao or "—" }}</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Produto</th>
+          <th class="text-end">Quantidade</th>
+          <th class="text-end">Custo unit.</th>
+          <th class="text-end">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in compra.itens %}
+        <tr>
+          <td>
+            {{ i.produto.nome }} <span class="text-muted small">({{ i.produto.codigo }})</span>
+            {% if i.produto.preco_venda < i.custo_unitario %}
+            <span class="badge text-bg-warning" title="O preço de venda atual é {{ i.produto.preco_venda|moeda }}">
+              Preço de venda abaixo do custo
+            </span>
+            {% endif %}
+          </td>
+          <td class="text-end">{{ i.quantidade|quantidade }} {{ i.produto.unidade_medida }}</td>
+          <td class="text-end">{{ i.custo_unitario|moeda }}</td>
+          <td class="text-end">{{ i.subtotal|moeda }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="table-light">
+        <tr><th colspan="3" class="text-end">Total</th><th class="text-end">{{ compra.total|moeda }}</th></tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+{% endblock %}

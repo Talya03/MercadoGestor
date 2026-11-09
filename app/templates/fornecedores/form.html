@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} · MercadoGestor{% endblock %}
+
+{% macro campo(f, ajuda=None) %}
+  <div class="mb-3">
+    {{ f.label(class="form-label") }}
+    {{ f(class="form-control" ~ (" is-invalid" if f.errors else ""), **kwargs) }}
+    {% for erro in f.errors %}<div class="invalid-feedback">{{ erro }}</div>{% endfor %}
+    {% if ajuda %}<div class="form-text">{{ ajuda }}</div>{% endif %}
+  </div>
+{% endmacro %}
+
+{% block content %}
+<h1 class="h3 mb-3">{{ titulo }}</h1>
+
+<div class="card" style="max-width: 560px;">
+  <div class="card-body">
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+      {{ campo(form.nome, maxlength=120, autofocus=true) }}
+      {{ campo(form.documento, "CPF (11 dígitos) ou CNPJ (14). Pontos e traços são aceitos.") }}
+      {{ campo(form.telefone) }}
+      {{ campo(form.contato, maxlength=80) }}
+      <div class="d-flex gap-2">
+        {{ form.submit(class="btn btn-success") }}
+        <a href="{{ url_for('fornecedores.lista') }}" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

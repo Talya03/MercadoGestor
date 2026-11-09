@@ -133,14 +133,17 @@ def _checar_limite(novo_saldo):
         raise ErroDeNegocio("O saldo resultante passaria do limite que o sistema comporta.")
 
 
-def entrada(produto_id, quantidade, motivo):
-    """Chegada de mercadoria: aumenta o saldo."""
+def entrada(produto_id, quantidade, motivo, confirmar=True):
+    """Chegada de mercadoria: aumenta o saldo.
+
+    confirmar=False: não faz commit (veja _registrar); usado no registro da COMPRA.
+    """
     produto = _carregar_produto(produto_id)
     quantidade = _validar_quantidade(quantidade, produto, "Quantidade")
     motivo = _validar_motivo(motivo)
     novo_saldo = produto.quantidade_estoque + quantidade
     _checar_limite(novo_saldo)
-    return _registrar(produto, "ENTRADA", quantidade, novo_saldo, motivo)
+    return _registrar(produto, "ENTRADA", quantidade, novo_saldo, motivo, confirmar)
 
 
 def validar_quantidade(valor, produto, rotulo="Quantidade", permitir_zero=False):

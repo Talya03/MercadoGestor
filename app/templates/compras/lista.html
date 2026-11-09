@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Compras · MercadoGestor{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Compras</h1>
+  <a href="{{ url_for('compras.nova') }}" class="btn btn-success">+ Nova compra</a>
+</div>
+
+<form method="get" class="row g-2 mb-3 align-items-end">
+  <div class="col-sm-4">
+    <label class="form-label small mb-1" for="fornecedor">Fornecedor</label>
+    <select name="fornecedor" id="fornecedor" class="form-select">
+      <option value="">Todos</option>
+      {% for f in fornecedores %}
+      <option value="{{ f.id }}" {{ 'selected' if fornecedor_id == f.id }}>{{ f.nome }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-sm-3">
+    <label class="form-label small mb-1" for="de">De</label>
+    <input type="date" name="de" id="de" class="form-control"
+           value="{{ data_inicio.isoformat() if data_inicio }}">
+  </div>
+  <div class="col-sm-3">
+    <label class="form-label small mb-1" for="ate">Até</label>
+    <input type="date" name="ate" id="ate" class="form-control"
+           value="{{ data_fim.isoformat() if data_fim }}">
+  </div>
+  <div class="col-auto d-flex gap-2">
+    <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
+    <a href="{{ url_for('compras.lista') }}" class="btn btn-link">Limpar</a>
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Compra</th>
+          <th>Data e hora</th>
+          <th>Fornecedor</th>
+          <th>Nota</th>
+          <th class="text-end">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in compras %}
+        <tr>
+          <td><a href="{{ url_for('compras.detalhe', compra_id=c.id) }}">#{{ c.id }}</a></td>
+          <td class="text-nowrap">{{ c.data_hora|data_hora }}</td>
+          <td>{{ c.fornecedor.nome }}</td>
+          <td class="text-muted">{{ c.numero_documento or "—" }}</td>
+          <td class="text-end fw-semibold">{{ c.total|moeda }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-4">Nenhuma compra encontrada.</td></tr>
+        {% endfor %}
+      </tbody>
+      {% if compras %}
+      <tfoot class="table-light">
+        <tr>
+          <th colspan="4">{{ compras|length }} compra{{ 's' if compras|length != 1 }}</th>
+          <th class="text-end">{{ total_periodo|moeda }}</th>
+        </tr>
+      </tfoot>
+      {% endif %}
+    </table>
+  </div>
+</div>
+{% if compras|length >= limite %}
+<p class="text-muted small mt-2">Mostrando as {{ limite }} compras mais recentes. Use os filtros para refinar.</p>
+{% endif %}
+{% endblock %}

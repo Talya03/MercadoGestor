@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Fornecedores · MercadoGestor{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Fornecedores</h1>
+  <a href="{{ url_for('fornecedores.novo') }}" class="btn btn-success">+ Novo fornecedor</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-sm-6 col-md-4">
+    <input type="search" name="q" value="{{ busca }}" class="form-control"
+           placeholder="Buscar por nome, CNPJ ou contato..." aria-label="Buscar fornecedor">
+  </div>
+  <div class="col-auto d-flex align-items-center">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="inativos" value="1"
+             id="inativos" {{ 'checked' if incluir_inativos }}>
+      <label class="form-check-label" for="inativos">Mostrar inativos</label>
+    </div>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Nome</th>
+          <th>CPF/CNPJ</th>
+          <th>Telefone</th>
+          <th>Contato</th>
+          <th>Status</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in fornecedores %}
+        <tr>
+          <td class="fw-semibold">{{ f.nome }}</td>
+          <td class="text-muted">{{ f.documento or "—" }}</td>
+          <td class="text-muted">{{ f.telefone or "—" }}</td>
+          <td class="text-muted">{{ f.contato or "—" }}</td>
+          <td>
+            {% if f.ativo %}<span class="badge text-bg-success">Ativo</span>
+            {% else %}<span class="badge text-bg-secondary">Inativo</span>{% endif %}
+          </td>
+          <td class="text-end text-nowrap">
+            {% if f.ativo %}
+            <a href="{{ url_for('compras.nova', fornecedor=f.id) }}" class="btn btn-sm btn-outline-success">Comprar</a>
+            {% endif %}
+            <a href="{{ url_for('fornecedores.editar', fornecedor_id=f.id) }}"
+               class="btn btn-sm btn-outline-primary">Editar</a>
+            <form method="post" action="{{ url_for('fornecedores.alternar', fornecedor_id=f.id) }}"
+                  class="d-inline"
+                  {% if f.ativo %}data-confirmar='Desativar o fornecedor "{{ f.nome }}"?'{% endif %}>
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              {% if f.ativo %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">Desativar</button>
+              {% else %}
+                <button type="submit" class="btn btn-sm btn-outline-success">Reativar</button>
+              {% endif %}
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">
+            {% if busca %}Nenhum fornecedor encontrado para "{{ busca }}".
+            {% else %}Nenhum fornecedor cadastrado ainda. Comece pelo "+ Novo fornecedor".{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

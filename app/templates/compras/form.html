@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Nova compra · MercadoGestor{% endblock %}
+
+{% macro linha(item) %}
+<tr class="linha-item">
+  <td>
+    <select name="produto_id" class="form-select" aria-label="Produto">
+      <option value="">Selecione...</option>
+      {% for p in produtos %}
+      <option value="{{ p.id }}" {{ 'selected' if item.get('produto_id')|string == p.id|string }}>
+        {{ p.nome }} ({{ p.codigo }}) · {{ p.unidade_medida }}
+      </option>
+      {% endfor %}
+    </select>
+  </td>
+  <td style="width: 140px;">
+    <input type="text" name="quantidade" class="form-control" inputmode="decimal"
+           placeholder="0" value="{{ item.get('quantidade', '') }}" aria-label="Quantidade">
+  </td>
+  <td style="width: 160px;">
+    <input type="text" name="custo_unitario" class="form-control" inputmode="decimal"
+           placeholder="0,00" value="{{ item.get('custo_unitario', '') }}" aria-label="Custo unitário">
+  </td>
+  <td class="text-end" style="width: 60px;">
+    <button type="button" class="btn btn-sm btn-outline-danger js-remover-linha"
+            aria-label="Remover item">✕</button>
+  </td>
+</tr>
+{% endmacro %}
+
+{% block content %}
+<h1 class="h3 mb-3">Nova compra</h1>
+
+{% if not fornecedores %}
+<div class="alert alert-warning">
+  Não há fornecedor ativo. <a href="{{ url_for('fornecedores.novo') }}" class="alert-link">Cadastre um fornecedor</a>
+  antes de registrar a compra.
+</div>
+{% elif not produtos %}
+<div class="alert alert-warning">
+  Não há produto ativo. <a href="{{ url_for('produtos.novo') }}" class="alert-link">Cadastre um produto</a>
+  antes de registrar a compra.
+</div>
+{% else %}
+<form method="post" novalidate id="form-compra">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="token" value="{{ token }}">
+
+  <div class="card mb-3">
+    <div class="card-body row g-3">
+      <div class="col-md-5">
+        <label class="form-label" for="fornecedor_id">Fornecedor</label>
+        <select name="fornecedor_id" id="fornecedor_id" class="form-select" autofocus>
+          <option value="">Selecione...</option>
+          {% for f in fornecedores %}
+          <option value="{{ f.id }}" {{ 'selected' if fornecedor_id == f.id }}>{{ f.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="numero_documento">Nº da nota (opcional)</label>
+        <input type="text" name="numero_documento" id="numero_documento" class="form-control"
+               maxlength="30" value="{{ documento }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="observacao">Observação (opcional)</label>
+        <input type="text" name="observacao" id="observacao" class="form-control"
+               maxlength="255" value="{{ observacao }}">
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead class="table-light">
+          <tr><th>Produto</th><th>Quantidade</th><th>Custo unitário (R$)</th><th></th></tr>
+        </thead>
+        <tbody id="linhas">
+          {% for item in itens %}{{ linha(item) }}{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center">
+      <button type="button" class="btn btn-outline-secondary btn-sm" id="adicionar-linha">+ Adicionar item</button>
+      <span class="fw-semibold">Total: <span id="total-previa">—</span></span>
+    </div>
+  </div>
+
+  <p class="text-muted small">
+    Ao registrar, o estoque de cada produto aumenta e o custo do produto passa a ser o custo desta compra.
+    O preço de venda não muda. A compra não pode ser editada depois.
+  </p>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-success" id="registrar">Registrar compra</button>
+    <a href="{{ url_for('compras.lista') }}" class="btn btn-outline-secondary">Cancelar</a>
+  </div>
+
+  <template id="modelo-linha">{{ linha({}) }}</template>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/compras.js') }}"></script>
+{% endblock %}

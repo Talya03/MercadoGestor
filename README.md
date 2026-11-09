@@ -59,3 +59,4 @@ MercadoGestor/
 - **v0.5**: CRUD de produtos (busca por nome/código, filtros por categoria e estoque baixo), entrada de valores em formato brasileiro, regras RN09–RN13.
 - **v0.6**: controle de estoque: entrada, saída e ajuste por contagem, histórico com filtros (produto, tipo, período), alerta de estoque baixo, gravação atômica com controle de concorrência, auditoria de saldos. Regras RN14–RN18.
 - **v0.7**: PDV: busca e adição por código, carrinho, desconto controlado, pagamento (dinheiro com troco, Pix, débito, crédito), comprovante imprimível e lista de vendas. Venda atômica com baixa de estoque e proteção contra venda duplicada. Regras RN19–RN30 (`docs/02-vendas-pdv.md`).
+- **v0.8**: Fornecedores (cadastro, busca, desativar/reativar) e Compras de mercadoria: vários itens por compra, entrada automática no estoque na mesma transação, custo do produto atualizado pela última compra, proteção contra compra duplicada. Regras RN31–RN39 (`docs/03-compras.md`).
