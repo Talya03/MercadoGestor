@@ -113,6 +113,28 @@ Notação: `||` = exatamente um; `o{` = zero ou muitos.
 - RN11: a unidade de medida não pode ser alterada se o produto já tem estoque ou histórico de movimentações.
 - RN12: o saldo de estoque não é editado no cadastro do produto. Começa em 0 e só muda por movimentações (Fase 4).
 - RN13: preço de venda abaixo do custo (ou zerado) é permitido, mas gera um aviso ao dono.
+- RN14: unidades contáveis (UN, CX, PCT) só aceitam quantidades inteiras; KG, G, L e ML aceitam até 3 casas decimais.
+- RN15: produto inativo não pode ser movimentado.
+- RN16: entrada e saída exigem quantidade maior que zero; no ajuste, o saldo contado deve ser diferente do saldo atual.
+- RN17: a movimentação e o novo saldo são gravados juntos, em uma única transação, com controle de concorrência (se outra operação mudou o saldo no meio do caminho, esta é recusada e nada é gravado).
+- RN18: movimentações não são editadas nem excluídas pelo sistema. Um lançamento errado é corrigido por um novo lançamento (ajuste), preservando o histórico.
+
+### Estoque: como funciona cada operação
+| Operação | O que a pessoa informa | O que o sistema registra |
+|---|---|---|
+| Entrada | quantidade recebida e motivo | `ENTRADA`, quantidade, saldo antes e depois |
+| Saída | quantidade que saiu e motivo | `SAIDA`, bloqueada se maior que o saldo (RN06) |
+| Ajuste | **saldo contado** nas prateleiras e motivo | `AJUSTE`, com a diferença (sempre positiva); o sentido aparece nos saldos antes/depois |
+
+Exemplo: o sistema mostra 24 caixas de leite, mas a contagem encontrou 22. O ajuste informa "22" e registra uma movimentação de 2 unidades, saldo 24 → 22.
+
+### Datas e horas
+- O banco guarda todas as datas em **UTC**. As telas convertem para o horário de São Paulo (`app/utils/datas.py`).
+- Filtros por dia usam o **dia do mercado**: uma entrada às 22:30 de 08/11 (01:30 UTC de 09/11) aparece no dia 08.
+- No Windows o Python precisa do pacote `tzdata` (já listado no `requirements.txt`).
+
+### Auditoria de saldos
+`estoque_service.conferir_saldos()` percorre a cadeia de movimentações de cada produto e aponta divergências entre o histórico e o saldo atual. Ainda não tem tela; será usada nos relatórios e na rotina de backup/verificação.
 
 ### Convenções de dados
 - Dinheiro: `Decimal`, 2 casas (máx. 99.999.999,99). Quantidades: `Decimal`, 3 casas.

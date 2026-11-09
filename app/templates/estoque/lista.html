@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Estoque · MercadoGestor{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Estoque</h1>
+  <div class="d-flex flex-wrap gap-2">
+    <a href="{{ url_for('estoque.movimentar', operacao='entrada') }}" class="btn btn-success">+ Entrada</a>
+    <a href="{{ url_for('estoque.movimentar', operacao='saida') }}" class="btn btn-outline-danger">Saída</a>
+    <a href="{{ url_for('estoque.movimentar', operacao='ajuste') }}" class="btn btn-outline-primary">Ajuste</a>
+    <a href="{{ url_for('estoque.historico') }}" class="btn btn-outline-secondary">Histórico</a>
+  </div>
+</div>
+
+{% if total_baixo and not apenas_baixo %}
+<div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert">
+  <span><strong>{{ total_baixo }}</strong>
+    produto{{ 's' if total_baixo != 1 }} com estoque baixo ou zerado.</span>
+  <a href="{{ url_for('estoque.lista', baixo=1) }}" class="alert-link">Ver quais são</a>
+</div>
+{% endif %}
+
+<form method="get" class="row g-2 mb-3 align-items-center">
+  <div class="col-sm-6 col-lg-4">
+    <input type="search" name="q" value="{{ busca }}" class="form-control"
+           placeholder="Buscar por nome ou código..." aria-label="Buscar produto">
+  </div>
+  <div class="col-auto">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="baixo" value="1" id="baixo"
+             {{ 'checked' if apenas_baixo }}>
+      <label class="form-check-label" for="baixo">Só estoque baixo</label>
+    </div>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Código</th>
+          <th>Produto</th>
+          <th>Categoria</th>
+          <th class="text-end">Saldo</th>
+          <th class="text-end">Mínimo</th>
+          <th>Situação</th>
+          <th class="text-end">Movimentar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in produtos %}
+        <tr>
+          <td><code>{{ p.codigo }}</code></td>
+          <td class="fw-semibold">{{ p.nome }}</td>
+          <td>{{ p.categoria.nome }}</td>
+          <td class="text-end fw-semibold">{{ p.quantidade_estoque|quantidade }} {{ p.unidade_medida }}</td>
+          <td class="text-end text-muted">{{ p.estoque_minimo|quantidade }}</td>
+          <td>
+            {% if p.quantidade_estoque == 0 %}
+              <span class="badge text-bg-danger">Sem estoque</span>
+            {% elif p.estoque_baixo %}
+              <span class="badge text-bg-warning">Baixo</span>
+            {% else %}
+              <span class="badge text-bg-success">Ok</span>
+            {% endif %}
+          </td>
+          <td class="text-end text-nowrap">
+            <a href="{{ url_for('estoque.movimentar', operacao='entrada', produto=p.id) }}"
+               class="btn btn-sm btn-outline-success">Entrada</a>
+            <a href="{{ url_for('estoque.movimentar', operacao='saida', produto=p.id) }}"
+               class="btn btn-sm btn-outline-danger">Saída</a>
+            <a href="{{ url_for('estoque.movimentar', operacao='ajuste', produto=p.id) }}"
+               class="btn btn-sm btn-outline-primary">Ajuste</a>
+            <a href="{{ url_for('estoque.historico', produto=p.id) }}"
+               class="btn btn-sm btn-outline-secondary">Histórico</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">
+            {% if busca or apenas_baixo %}Nenhum produto encontrado com esses filtros.
+            {% else %}Nenhum produto ativo. Cadastre produtos em "Produtos" para controlar o estoque.{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

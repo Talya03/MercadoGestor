@@ -36,5 +36,10 @@ class MovimentacaoEstoque(db.Model):
 
     produto = db.relationship("Produto", back_populates="movimentacoes")
 
+    @property
+    def variacao(self):
+        """Efeito real no saldo, com sinal: +10 (entrada), -3 (saída), ±n (ajuste)."""
+        return self.saldo_posterior - self.saldo_anterior
+
     def __repr__(self):
         return f"<Movimentacao {self.id} {self.tipo} {self.quantidade}>"

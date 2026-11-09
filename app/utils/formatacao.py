@@ -1,6 +1,8 @@
 """Filtros de exibição para os templates (Jinja): {{ valor|moeda }}."""
 from decimal import Decimal
 
+from app.utils.datas import para_local
+
 
 def moeda(valor):
     """6.9 -> 'R$ 6,90'    1234.5 -> 'R$ 1.234,50'"""
@@ -17,3 +19,16 @@ def quantidade(valor):
     if valor is None:
         return "—"
     return format(Decimal(valor).normalize(), "f").replace(".", ",")
+
+
+def quantidade_com_sinal(valor):
+    """+10 para aumentos, -3 para reduções (usado no histórico)."""
+    texto = quantidade(valor)
+    return f"+{texto}" if Decimal(valor) > 0 else texto
+
+
+def data_hora(valor):
+    """datetime em UTC -> '08/11/2026 17:30' no horário local."""
+    if valor is None:
+        return "—"
+    return para_local(valor).strftime("%d/%m/%Y %H:%M")

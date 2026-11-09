@@ -49,3 +49,4 @@ MercadoGestor/
 - **v0.3**: modelos Categoria, Produto e MovimentacaoEstoque com restrições (UNIQUE, CHECK, chaves estrangeiras) e testes.
 - **v0.4**: CRUD de categorias (listar, cadastrar, editar, desativar/reativar, busca), menu lateral, mensagens, proteção CSRF.
 - **v0.5**: CRUD de produtos (busca por nome/código, filtros por categoria e estoque baixo), entrada de valores em formato brasileiro, regras RN09–RN13.
+- **v0.6**: controle de estoque: entrada, saída e ajuste por contagem, histórico com filtros (produto, tipo, período), alerta de estoque baixo, gravação atômica com controle de concorrência, auditoria de saldos. Regras RN14–RN18.

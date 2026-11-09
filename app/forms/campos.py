@@ -1,8 +1,15 @@
 """Campos de formulário personalizados."""
 from wtforms import DecimalField
+from wtforms.validators import ValidationError
 from wtforms.widgets import TextInput
 
 from app.utils.numeros import formatar_decimal_br, parse_decimal_br
+
+
+def nao_negativo(form, campo):
+    """Validador: recusa números negativos (se o valor nem foi lido, não opina)."""
+    if campo.data is not None and campo.data < 0:
+        raise ValidationError("O valor não pode ser negativo.")
 
 
 class DecimalBRField(DecimalField):

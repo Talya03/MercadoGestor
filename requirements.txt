@@ -2,4 +2,5 @@ Flask>=3.0
 Flask-SQLAlchemy>=3.1
 Flask-WTF>=1.2
 WTForms>=3.3
+tzdata
 pytest>=8.0

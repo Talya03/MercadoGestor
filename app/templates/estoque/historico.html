@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Histórico de estoque · MercadoGestor{% endblock %}
+
+{% set rotulos = {'ENTRADA': 'Entrada', 'SAIDA': 'Saída', 'AJUSTE': 'Ajuste'} %}
+{% set cores = {'ENTRADA': 'success', 'SAIDA': 'danger', 'AJUSTE': 'primary'} %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Histórico de movimentações</h1>
+  <a href="{{ url_for('estoque.lista') }}" class="btn btn-outline-secondary">← Voltar ao estoque</a>
+</div>
+
+<form method="get" class="row g-2 mb-3 align-items-end">
+  <div class="col-md-4">
+    <label class="form-label small mb-1" for="produto">Produto</label>
+    <select name="produto" id="produto" class="form-select">
+      <option value="">Todos os produtos</option>
+      {% for p in produtos %}
+        <option value="{{ p.id }}" {{ 'selected' if produto_id == p.id }}>{{ p.nome }} · {{ p.codigo }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label small mb-1" for="tipo">Tipo</label>
+    <select name="tipo" id="tipo" class="form-select">
+      <option value="">Todos</option>
+      {% for t in tipos %}
+        <option value="{{ t }}" {{ 'selected' if tipo == t }}>{{ rotulos[t] }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label small mb-1" for="de">De</label>
+    <input type="date" name="de" id="de" class="form-control"
+           value="{{ data_inicio.isoformat() if data_inicio }}">
+  </div>
+  <div class="col-md-2">
+    <label class="form-label small mb-1" for="ate">Até</label>
+    <input type="date" name="ate" id="ate" class="form-control"
+           value="{{ data_fim.isoformat() if data_fim }}">
+  </div>
+  <div class="col-md-2 d-flex gap-2">
+    <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
+    <a href="{{ url_for('estoque.historico') }}" class="btn btn-link">Limpar</a>
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Data e hora</th>
+          <th>Produto</th>
+          <th>Tipo</th>
+          <th class="text-end">Variação</th>
+          <th class="text-end">Saldo</th>
+          <th>Motivo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in movimentacoes %}
+        {% set v = m.variacao %}
+        <tr>
+          <td class="text-nowrap">{{ m.data_hora|data_hora }}</td>
+          <td>
+            <span class="fw-semibold">{{ m.produto.nome }}</span>
+            <code class="ms-1">{{ m.produto.codigo }}</code>
+          </td>
+          <td><span class="badge text-bg-{{ cores[m.tipo] }}">{{ rotulos[m.tipo] }}</span></td>
+          <td class="text-end fw-semibold {{ 'text-success' if v > 0 else 'text-danger' }}">
+            {{ v|quantidade_com_sinal }} {{ m.produto.unidade_medida }}
+          </td>
+          <td class="text-end text-muted text-nowrap">
+            {{ m.saldo_anterior|quantidade }} → {{ m.saldo_posterior|quantidade }}
+          </td>
+          <td>{{ m.motivo }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">
+            Nenhuma movimentação encontrada com esses filtros.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if movimentacoes|length >= limite %}
+<p class="text-muted small mt-2">
+  Mostrando as {{ limite }} movimentações mais recentes. Use os filtros para refinar a busca.
+</p>
+{% endif %}
+{% endblock %}

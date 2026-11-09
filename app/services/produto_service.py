@@ -19,7 +19,7 @@ from sqlalchemy.orm import joinedload
 from app.extensions import db
 from app.models import Categoria, Produto
 from app.utils.erros import ErroDeNegocio
-from app.utils.numeros import parse_decimal_br
+from app.utils.numeros import validar_decimal
 
 UNIDADES = {
     "UN": "Unidade (UN)",
@@ -40,23 +40,6 @@ QUANTIDADE_MAXIMA = Decimal("9999999.999")
 
 def _normalizar(texto):
     return " ".join((texto or "").split())
-
-
-def _como_decimal(valor, rotulo, casas, maximo):
-    """Converte, valida (não negativo, limite, casas decimais) e padroniza."""
-    try:
-        numero = parse_decimal_br(valor)
-    except ValueError as erro:
-        raise ErroDeNegocio(f"{rotulo}: {erro}")
-    if numero < 0:
-        raise ErroDeNegocio(f"{rotulo} não pode ser negativo.")
-    if numero > maximo:
-        raise ErroDeNegocio(f"{rotulo} é grande demais.")
-    passo = Decimal(1).scaleb(-casas)
-    # Recusamos 4,505 em vez de arredondar em silêncio: dinheiro não se "adivinha".
-    if numero != numero.quantize(passo):
-        raise ErroDeNegocio(f"{rotulo} aceita no máximo {casas} casas decimais.")
-    return numero.quantize(passo)
 
 
 def _mensagem_codigo_duplicado(codigo):
@@ -107,9 +90,9 @@ def _validar(dados, produto_atual=None):
         "codigo": codigo,
         "unidade_medida": unidade,
         "categoria_id": categoria.id,
-        "preco_custo": _como_decimal(dados.get("preco_custo"), "Preço de custo", 2, PRECO_MAXIMO),
-        "preco_venda": _como_decimal(dados.get("preco_venda"), "Preço de venda", 2, PRECO_MAXIMO),
-        "estoque_minimo": _como_decimal(
+        "preco_custo": validar_decimal(dados.get("preco_custo"), "Preço de custo", 2, PRECO_MAXIMO),
+        "preco_venda": validar_decimal(dados.get("preco_venda"), "Preço de venda", 2, PRECO_MAXIMO),
+        "estoque_minimo": validar_decimal(
             dados.get("estoque_minimo"), "Estoque mínimo", 3, QUANTIDADE_MAXIMA
         ),
     }

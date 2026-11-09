@@ -7,10 +7,9 @@ from wtforms.validators import (
     InputRequired,
     Length,
     NumberRange,
-    ValidationError,
 )
 
-from app.forms.campos import DecimalBRField
+from app.forms.campos import DecimalBRField, nao_negativo
 from app.services.produto_service import UNIDADES
 
 CAMPOS = (
@@ -22,11 +21,6 @@ CAMPOS = (
     "preco_venda",
     "estoque_minimo",
 )
-
-
-def _nao_negativo(form, campo):
-    if campo.data is not None and campo.data < 0:
-        raise ValidationError("O valor não pode ser negativo.")
 
 
 class ProdutoForm(FlaskForm):
@@ -60,20 +54,20 @@ class ProdutoForm(FlaskForm):
     preco_custo = DecimalBRField(
         "Preço de custo (R$)",
         casas=2,
-        validators=[InputRequired(message="Informe o preço de custo."), _nao_negativo],
+        validators=[InputRequired(message="Informe o preço de custo."), nao_negativo],
         render_kw={"inputmode": "decimal", "placeholder": "0,00"},
     )
     preco_venda = DecimalBRField(
         "Preço de venda (R$)",
         casas=2,
-        validators=[InputRequired(message="Informe o preço de venda."), _nao_negativo],
+        validators=[InputRequired(message="Informe o preço de venda."), nao_negativo],
         render_kw={"inputmode": "decimal", "placeholder": "0,00"},
     )
     estoque_minimo = DecimalBRField(
         "Estoque mínimo",
         casas=3,
         aparar_zeros=True,
-        validators=[InputRequired(message="Informe o estoque mínimo."), _nao_negativo],
+        validators=[InputRequired(message="Informe o estoque mínimo."), nao_negativo],
         render_kw={"inputmode": "decimal", "placeholder": "0"},
     )
     submit = SubmitField("Salvar")

@@ -27,6 +27,10 @@
           <a class="nav-link {{ 'active' if request.blueprint == 'produtos' }}"
              href="{{ url_for('produtos.lista') }}">Produtos</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'estoque' }}"
+             href="{{ url_for('estoque.lista') }}">Estoque</a>
+        </li>
       </ul>
     </aside>
 

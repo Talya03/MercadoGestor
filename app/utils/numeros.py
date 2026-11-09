@@ -7,6 +7,8 @@ Dinheiro e quantidades usam Decimal (nunca float) para não gerar centavos errad
 import re
 from decimal import Decimal
 
+from app.utils.erros import ErroDeNegocio
+
 _PADRAO_NUMERO = re.compile(r"-?(\d+\.?\d*|\.\d+)")
 _MSG_INVALIDO = "Valor inválido. Use apenas números, por exemplo 4,50."
 
@@ -38,6 +40,27 @@ def parse_decimal_br(texto):
     if not valor.is_finite():
         raise ValueError(_MSG_INVALIDO)
     return valor
+
+
+def validar_decimal(valor, rotulo, casas, maximo):
+    """Converte e valida um número vindo do usuário (regra usada por preços e quantidades).
+
+    Recusa: valor inválido, negativo, acima do limite que cabe no banco, ou com
+    mais casas decimais que o permitido (não arredonda em silêncio: dinheiro
+    e estoque não se "adivinham"). Devolve Decimal padronizado.
+    """
+    try:
+        numero = parse_decimal_br(valor)
+    except ValueError as erro:
+        raise ErroDeNegocio(f"{rotulo}: {erro}")
+    if numero < 0:
+        raise ErroDeNegocio(f"{rotulo} não pode ser negativo.")
+    if numero > maximo:
+        raise ErroDeNegocio(f"{rotulo} é grande demais.")
+    passo = Decimal(1).scaleb(-casas)
+    if numero != numero.quantize(passo):
+        raise ErroDeNegocio(f"{rotulo} aceita no máximo {casas} casas decimais.")
+    return numero.quantize(passo)
 
 
 def formatar_decimal_br(valor, casas=2, aparar_zeros=False):

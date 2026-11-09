@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ config.titulo }} · MercadoGestor{% endblock %}
+
+{% macro campo(f, ajuda=None) %}
+  <div class="mb-3">
+    {{ f.label(class="form-label") }}
+    {{ f(class=("form-select" if f.type == "SelectField" else "form-control") ~ (" is-invalid" if f.errors else ""), **kwargs) }}
+    {% for erro in f.errors %}<div class="invalid-feedback">{{ erro }}</div>{% endfor %}
+    {% if ajuda %}<div class="form-text">{{ ajuda }}</div>{% endif %}
+  </div>
+{% endmacro %}
+
+{% block content %}
+<h1 class="h3 mb-3">{{ config.titulo }}</h1>
+
+<ul class="nav nav-tabs mb-3" style="max-width: 640px;">
+  {% for chave, rotulo in [('entrada', 'Entrada'), ('saida', 'Saída'), ('ajuste', 'Ajuste')] %}
+  <li class="nav-item">
+    <a class="nav-link {{ 'active' if operacao == chave }}"
+       href="{{ url_for('estoque.movimentar', operacao=chave, produto=form.produto_id.data or None) }}">{{ rotulo }}</a>
+  </li>
+  {% endfor %}
+</ul>
+
+<div class="card" style="max-width: 640px;">
+  <div class="card-body">
+    <p class="text-muted small">{{ config.ajuda }}</p>
+
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+
+      {{ campo(form.produto_id, autofocus=true) }}
+      {{ campo(form.quantidade) }}
+      {{ campo(form.motivo, "Escolha uma sugestão ou escreva o motivo.") }}
+      <datalist id="motivos-sugeridos">
+        {% for m in config.motivos %}<option value="{{ m }}">{% endfor %}
+      </datalist>
+
+      <div class="d-flex gap-2">
+        {{ form.submit(class="btn btn-success") }}
+        <a href="{{ url_for('estoque.lista') }}" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

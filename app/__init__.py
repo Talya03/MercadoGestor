@@ -19,16 +19,20 @@ def create_app(config_class=Config):
 
     from app import models  # noqa: F401  (registra os modelos no SQLAlchemy)
     from app.routes.categorias import categorias_bp
+    from app.routes.estoque import estoque_bp
     from app.routes.main import main_bp
     from app.routes.produtos import produtos_bp
-    from app.utils.formatacao import moeda, quantidade
+    from app.utils.formatacao import data_hora, moeda, quantidade, quantidade_com_sinal
 
     app.register_blueprint(main_bp)
     app.register_blueprint(categorias_bp)
     app.register_blueprint(produtos_bp)
+    app.register_blueprint(estoque_bp)
 
     # Filtros usados nos templates: {{ preco|moeda }}, {{ saldo|quantidade }}
     app.add_template_filter(moeda, "moeda")
     app.add_template_filter(quantidade, "quantidade")
+    app.add_template_filter(quantidade_com_sinal, "quantidade_com_sinal")
+    app.add_template_filter(data_hora, "data_hora")
 
     return app
