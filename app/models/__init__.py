@@ -3,5 +3,15 @@ antes de db.create_all() criar as tabelas."""
 from app.models.categoria import Categoria
 from app.models.movimentacao_estoque import MovimentacaoEstoque, TIPOS_MOVIMENTACAO
 from app.models.produto import Produto
+from app.models.venda import FORMAS_PAGAMENTO, ItemVenda, Pagamento, Venda
 
-__all__ = ["Categoria", "Produto", "MovimentacaoEstoque", "TIPOS_MOVIMENTACAO"]
+__all__ = [
+    "Categoria",
+    "Produto",
+    "MovimentacaoEstoque",
+    "TIPOS_MOVIMENTACAO",
+    "Venda",
+    "ItemVenda",
+    "Pagamento",
+    "FORMAS_PAGAMENTO",
+]

@@ -71,8 +71,12 @@ def _validar_quantidade(valor, produto, rotulo, permitir_zero=False):
 
 
 # ------------------------------------------------------------------ gravação
-def _registrar(produto, tipo, quantidade, novo_saldo, motivo):
+def _registrar(produto, tipo, quantidade, novo_saldo, motivo, confirmar=True):
     """Grava movimentação + novo saldo de forma atômica e consistente (RN05, RN17).
+
+    confirmar=False é usado pela VENDA: a baixa de estoque entra na transação
+    maior da venda (venda + itens + pagamento + baixas). Nesse caso não há
+    commit aqui; quem chamou confirma tudo junto ou desfaz tudo junto.
 
     Dois conceitos importantes:
 
@@ -95,7 +99,8 @@ def _registrar(produto, tipo, quantidade, novo_saldo, motivo):
         execution_options={"synchronize_session": False},
     )
     if resultado.rowcount != 1:
-        db.session.rollback()
+        if confirmar:
+            db.session.rollback()
         raise ErroDeNegocio(
             "O estoque deste produto foi alterado por outra operação. "
             "Confira o saldo atual e tente novamente."
@@ -111,7 +116,10 @@ def _registrar(produto, tipo, quantidade, novo_saldo, motivo):
     )
     db.session.add(movimentacao)
     try:
-        db.session.commit()
+        if confirmar:
+            db.session.commit()
+        else:
+            db.session.flush()  # envia ao banco (e checa as restrições) sem confirmar
     except IntegrityError:
         # Rede de segurança: as restrições CHECK do banco barraram algo
         # que as validações acima deixaram passar (não deveria acontecer).
@@ -135,8 +143,16 @@ def entrada(produto_id, quantidade, motivo):
     return _registrar(produto, "ENTRADA", quantidade, novo_saldo, motivo)
 
 
-def saida(produto_id, quantidade, motivo):
-    """Saída por perda, vencimento, consumo etc.: diminui o saldo (RN04, RN06)."""
+def validar_quantidade(valor, produto, rotulo="Quantidade", permitir_zero=False):
+    """Versão pública da validação de quantidade (RN14, RN16), usada também pelo PDV."""
+    return _validar_quantidade(valor, produto, rotulo, permitir_zero)
+
+
+def saida(produto_id, quantidade, motivo, confirmar=True):
+    """Saída por perda, vencimento, consumo, venda etc.: diminui o saldo (RN04, RN06).
+
+    confirmar=False: não faz commit (veja _registrar); usado na finalização da venda.
+    """
     produto = _carregar_produto(produto_id)
     quantidade = _validar_quantidade(quantidade, produto, "Quantidade")
     motivo = _validar_motivo(motivo)
@@ -146,7 +162,7 @@ def saida(produto_id, quantidade, motivo):
             f"Saldo insuficiente: há {formatar_quantidade(saldo)} {produto.unidade_medida} "
             f"em estoque e a saída pedida é de {formatar_quantidade(quantidade)}."
         )
-    return _registrar(produto, "SAIDA", quantidade, saldo - quantidade, motivo)
+    return _registrar(produto, "SAIDA", quantidade, saldo - quantidade, motivo, confirmar)
 
 
 def ajuste(produto_id, saldo_contado, motivo):

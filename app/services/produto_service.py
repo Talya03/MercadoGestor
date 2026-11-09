@@ -105,6 +105,21 @@ def buscar(produto_id):
     return produto
 
 
+def buscar_ativo_por_codigo(codigo):
+    """Produto ATIVO cujo código é exatamente `codigo` (sem diferenciar maiúsculas).
+
+    Usado pelo PDV: quem digita (ou, no futuro, bipa) um código quer exatamente
+    aquele produto, e não uma lista de parecidos.
+    """
+    alvo = _normalizar(codigo).casefold()
+    if not alvo:
+        raise ErroDeNegocio("Informe o código do produto.")
+    for produto in listar(alvo):
+        if produto.codigo.casefold() == alvo:
+            return produto
+    raise ErroDeNegocio(f'Nenhum produto ativo com o código "{_normalizar(codigo)}".')
+
+
 def listar(busca="", categoria_id=None, incluir_inativos=False, apenas_estoque_baixo=False):
     """Lista produtos por nome. A busca procura no nome OU no código.
 

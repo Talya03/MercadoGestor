@@ -8,16 +8,24 @@
   <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
 <body>
-  <nav class="navbar navbar-dark bg-success px-3">
+  <nav class="navbar navbar-dark bg-success px-3 no-print">
     <span class="navbar-brand mb-0 h1">MercadoGestor</span>
   </nav>
 
   <div class="d-flex">
-    <aside class="sidebar bg-white border-end p-3">
+    <aside class="sidebar bg-white border-end p-3 no-print">
       <ul class="nav nav-pills flex-column gap-1">
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.endpoint == 'main.index' }}"
              href="{{ url_for('main.index') }}">Início</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.endpoint == 'pdv.tela' }}"
+             href="{{ url_for('pdv.tela') }}">PDV (caixa)</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.endpoint in ('pdv.vendas', 'pdv.comprovante') }}"
+             href="{{ url_for('pdv.vendas') }}">Vendas</a>
         </li>
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.blueprint == 'categorias' }}"
@@ -50,5 +58,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

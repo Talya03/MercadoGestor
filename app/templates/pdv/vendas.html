@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Vendas · MercadoGestor{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Vendas</h1>
+  <a href="{{ url_for('pdv.tela') }}" class="btn btn-success">Abrir o PDV</a>
+</div>
+
+<form method="get" class="row g-2 mb-3 align-items-end">
+  <div class="col-sm-3">
+    <label class="form-label small mb-1" for="de">De</label>
+    <input type="date" name="de" id="de" class="form-control"
+           value="{{ data_inicio.isoformat() if data_inicio }}">
+  </div>
+  <div class="col-sm-3">
+    <label class="form-label small mb-1" for="ate">Até</label>
+    <input type="date" name="ate" id="ate" class="form-control"
+           value="{{ data_fim.isoformat() if data_fim }}">
+  </div>
+  <div class="col-auto d-flex gap-2">
+    <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
+    <a href="{{ url_for('pdv.vendas', de='', ate='') }}" class="btn btn-link">Todas</a>
+  </div>
+</form>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Venda</th>
+          <th>Data e hora</th>
+          <th>Pagamento</th>
+          <th class="text-end">Desconto</th>
+          <th class="text-end">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in vendas %}
+        <tr>
+          <td><a href="{{ url_for('pdv.comprovante', venda_id=v.id) }}">#{{ v.id }}</a></td>
+          <td class="text-nowrap">{{ v.data_hora|data_hora }}</td>
+          <td>{% for p in v.pagamentos %}{{ p.forma_nome }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+          <td class="text-end text-muted">{{ v.desconto|moeda if v.desconto > 0 else '—' }}</td>
+          <td class="text-end fw-semibold">{{ v.total|moeda }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-center text-muted py-4">Nenhuma venda neste período.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      {% if vendas %}
+      <tfoot class="table-light">
+        <tr>
+          <th colspan="4">{{ vendas|length }} venda{{ 's' if vendas|length != 1 }} no período</th>
+          <th class="text-end">{{ total_periodo|moeda }}</th>
+        </tr>
+      </tfoot>
+      {% endif %}
+    </table>
+  </div>
+</div>
+
+{% if vendas|length >= limite %}
+<p class="text-muted small mt-2">Mostrando as {{ limite }} vendas mais recentes. Use o filtro de datas para refinar.</p>
+{% endif %}
+{% endblock %}

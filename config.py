@@ -5,6 +5,7 @@ Conceito: separar configuração do código permite trocar o comportamento
 Valores sensíveis (como SECRET_KEY) vêm de variáveis de ambiente.
 """
 import os
+from decimal import Decimal
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,6 +21,10 @@ class Config:
         "sqlite:///" + os.path.join(BASE_DIR, "instance", "mercadogestor.db"),
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Desconto máximo (em % do total da venda) que o caixa pode dar.
+    # Quando existirem perfis de usuário (Fase 8), o administrador poderá ter outro limite.
+    DESCONTO_MAXIMO_PERCENTUAL = Decimal(os.environ.get("DESCONTO_MAXIMO_PERCENTUAL", "10"))
 
 
 class TestConfig(Config):

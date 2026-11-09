@@ -43,6 +43,14 @@ MercadoGestor/
 └── requirements.txt
 ```
 
+## Configurações opcionais (variáveis de ambiente)
+
+| Variável | Para quê | Padrão |
+|---|---|---|
+| `SECRET_KEY` | Assina a sessão e o CSRF. **Defina um valor longo e aleatório antes de qualquer uso real.** | valor de desenvolvimento |
+| `DATABASE_URL` | Troca o banco | SQLite em `instance/mercadogestor.db` |
+| `DESCONTO_MAXIMO_PERCENTUAL` | Desconto máximo do caixa, em % do total | `10` |
+
 ## Histórico de versões
 - **v0.1**: modelagem de Categoria, Produto e Movimentação de Estoque.
 - **v0.2**: estrutura inicial Flask + SQLite + página inicial + testes básicos.
@@ -50,3 +58,4 @@ MercadoGestor/
 - **v0.4**: CRUD de categorias (listar, cadastrar, editar, desativar/reativar, busca), menu lateral, mensagens, proteção CSRF.
 - **v0.5**: CRUD de produtos (busca por nome/código, filtros por categoria e estoque baixo), entrada de valores em formato brasileiro, regras RN09–RN13.
 - **v0.6**: controle de estoque: entrada, saída e ajuste por contagem, histórico com filtros (produto, tipo, período), alerta de estoque baixo, gravação atômica com controle de concorrência, auditoria de saldos. Regras RN14–RN18.
+- **v0.7**: PDV: busca e adição por código, carrinho, desconto controlado, pagamento (dinheiro com troco, Pix, débito, crédito), comprovante imprimível e lista de vendas. Venda atômica com baixa de estoque e proteção contra venda duplicada. Regras RN19–RN30 (`docs/02-vendas-pdv.md`).

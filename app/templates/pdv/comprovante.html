@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Venda #{{ venda.id }} · MercadoGestor{% endblock %}
+
+{% block content %}
+{% set pagamento = venda.pagamentos[0] if venda.pagamentos else None %}
+
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
+  <h1 class="h3 mb-0">Venda #{{ venda.id }}</h1>
+  <div class="d-flex gap-2">
+    <button type="button" class="btn btn-outline-secondary" onclick="window.print()">Imprimir</button>
+    <a href="{{ url_for('pdv.tela') }}" class="btn btn-success">Nova venda</a>
+  </div>
+</div>
+
+<div class="card" style="max-width: 560px;">
+  <div class="card-body">
+    <div class="text-center mb-3">
+      <div class="h5 mb-0">MercadoGestor</div>
+      <div class="small text-muted">Comprovante de venda · não é documento fiscal</div>
+    </div>
+
+    <div class="d-flex justify-content-between small text-muted mb-2">
+      <span>Venda #{{ venda.id }}</span>
+      <span>{{ venda.data_hora|data_hora }}</span>
+    </div>
+
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th class="text-end">Qtd.</th>
+          <th class="text-end">Unit.</th>
+          <th class="text-end">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in venda.itens %}
+        <tr>
+          <td>{{ item.produto.nome }}</td>
+          <td class="text-end">{{ item.quantidade|quantidade }} {{ item.produto.unidade_medida }}</td>
+          <td class="text-end">{{ item.preco_unitario|moeda }}</td>
+          <td class="text-end">{{ item.subtotal|moeda }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between"><span>Subtotal</span><span>{{ venda.subtotal|moeda }}</span></div>
+    {% if venda.desconto > 0 %}
+    <div class="d-flex justify-content-between text-success">
+      <span>Desconto</span><span>− {{ venda.desconto|moeda }}</span>
+    </div>
+    {% endif %}
+    <div class="d-flex justify-content-between align-items-baseline border-top mt-2 pt-2">
+      <span class="h5 mb-0">Total</span><span class="h4 mb-0">{{ venda.total|moeda }}</span>
+    </div>
+
+    {% if pagamento %}
+    <div class="border-top mt-3 pt-2 small">
+      <div class="d-flex justify-content-between">
+        <span>Pagamento</span><span>{{ pagamento.forma_nome }}</span>
+      </div>
+      {% if pagamento.valor_recebido is not none %}
+      <div class="d-flex justify-content-between">
+        <span>Valor recebido</span><span>{{ pagamento.valor_recebido|moeda }}</span>
+      </div>
+      <div class="d-flex justify-content-between fw-semibold">
+        <span>Troco</span><span>{{ pagamento.troco|moeda }}</span>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

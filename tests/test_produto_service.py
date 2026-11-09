@@ -255,3 +255,31 @@ def test_filtro_de_estoque_baixo(categoria):  # RN07
     definir_estoque(baixo, "1")
 
     assert [p.nome for p in service.listar(apenas_estoque_baixo=True)] == ["Baixo", "Limite"]
+
+
+# ---------- busca exata por código (usada pelo PDV) ----------
+def test_busca_ativa_por_codigo_exato_ignorando_caixa_e_espacos(categoria):
+    p = service.criar(dados(categoria, codigo="ABC123"))
+    assert service.buscar_ativo_por_codigo("abc123").id == p.id
+    assert service.buscar_ativo_por_codigo("  ABC123 ").id == p.id
+
+
+def test_busca_por_codigo_nao_aceita_codigo_parcial_nem_parecido(categoria):
+    service.criar(dados(categoria, codigo="ABC12", nome="Curto"))
+    longo = service.criar(dados(categoria, codigo="ABC123", nome="Longo"))
+    assert service.buscar_ativo_por_codigo("ABC123").id == longo.id
+    with pytest.raises(ErroDeNegocio, match="Nenhum produto ativo"):
+        service.buscar_ativo_por_codigo("ABC1")
+
+
+def test_busca_por_codigo_ignora_produto_inativo(categoria):
+    p = service.criar(dados(categoria, codigo="ABC123"))
+    service.alternar_ativo(p.id)
+    with pytest.raises(ErroDeNegocio, match="Nenhum produto ativo"):
+        service.buscar_ativo_por_codigo("ABC123")
+
+
+@pytest.mark.parametrize("codigo", ["", "   ", None])
+def test_busca_por_codigo_vazio(categoria, codigo):
+    with pytest.raises(ErroDeNegocio, match="Informe o código"):
+        service.buscar_ativo_por_codigo(codigo)

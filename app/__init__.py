@@ -21,6 +21,7 @@ def create_app(config_class=Config):
     from app.routes.categorias import categorias_bp
     from app.routes.estoque import estoque_bp
     from app.routes.main import main_bp
+    from app.routes.pdv import pdv_bp
     from app.routes.produtos import produtos_bp
     from app.utils.formatacao import data_hora, moeda, quantidade, quantidade_com_sinal
 
@@ -28,6 +29,7 @@ def create_app(config_class=Config):
     app.register_blueprint(categorias_bp)
     app.register_blueprint(produtos_bp)
     app.register_blueprint(estoque_bp)
+    app.register_blueprint(pdv_bp)
 
     # Filtros usados nos templates: {{ preco|moeda }}, {{ saldo|quantidade }}
     app.add_template_filter(moeda, "moeda")

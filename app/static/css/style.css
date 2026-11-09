@@ -11,3 +11,16 @@ body {
 .nav-pills .nav-link.active {
   background-color: #198754;
 }
+
+/* Comprovante: ao imprimir, some o menu e fica só o recibo. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  main {
+    padding: 0 !important;
+  }
+}

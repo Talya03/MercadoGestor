@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% block title %}PDV · MercadoGestor{% endblock %}
+
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+
+{% block content %}
+<h1 class="h3 mb-3">PDV · Caixa</h1>
+
+<div class="row g-3">
+
+  {# ===================== ESQUERDA: adicionar produtos ===================== #}
+  <div class="col-lg-7">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h2 class="h6 text-muted mb-3">Adicionar pelo código</h2>
+        <form method="post" action="{{ url_for('pdv.adicionar_por_codigo') }}" class="row g-2">
+          {{ csrf() }}
+          <div class="col">
+            <input type="text" name="codigo" id="busca-pdv" class="form-control form-control-lg"
+                   placeholder="Digite o código e tecle Enter" autocomplete="off"
+                   aria-label="Código do produto">
+          </div>
+          <div class="col-3 col-md-2">
+            <input type="text" name="quantidade" value="1" inputmode="decimal"
+                   class="form-control form-control-lg" aria-label="Quantidade">
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-success btn-lg" type="submit">Adicionar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <h2 class="h6 text-muted mb-3">Buscar pelo nome</h2>
+        <form method="get" class="row g-2 mb-3">
+          <div class="col">
+            <input type="search" name="q" value="{{ busca }}" class="form-control"
+                   placeholder="Ex.: leite, arroz, tomate..." aria-label="Buscar produto">
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+          </div>
+        </form>
+
+        {% if busca %}
+          {% if resultados %}
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Produto</th>
+                  <th class="text-end">Preço</th>
+                  <th class="text-end">Saldo</th>
+                  <th class="text-end">Qtd.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for p in resultados %}
+                <tr>
+                  <td>
+                    <span class="fw-semibold">{{ p.nome }}</span>
+                    <code class="ms-1">{{ p.codigo }}</code>
+                  </td>
+                  <td class="text-end">{{ p.preco_venda|moeda }}/{{ p.unidade_medida }}</td>
+                  <td class="text-end">
+                    {% if p.quantidade_estoque == 0 %}
+                      <span class="badge text-bg-danger">Sem estoque</span>
+                    {% else %}
+                      {{ p.quantidade_estoque|quantidade }} {{ p.unidade_medida }}
+                    {% endif %}
+                  </td>
+                  <td class="text-end">
+                    <form method="post" action="{{ url_for('pdv.adicionar') }}"
+                          class="d-inline-flex gap-1">
+                      {{ csrf() }}
+                      <input type="hidden" name="produto_id" value="{{ p.id }}">
+                      <input type="text" name="quantidade" value="1" inputmode="decimal"
+                             class="form-control form-control-sm" style="width: 70px;"
+                             aria-label="Quantidade de {{ p.nome }}">
+                      <button class="btn btn-sm btn-success" type="submit"
+                              {{ 'disabled' if p.quantidade_estoque == 0 }}>+</button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+            <p class="text-muted mb-0">Nenhum produto ativo encontrado para "{{ busca }}".</p>
+          {% endif %}
+        {% else %}
+          <p class="text-muted small mb-0">Digite parte do nome ou do código para ver os produtos.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# ============================ DIREITA: carrinho ============================ #}
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>Carrinho</strong>
+        {% if not resumo.vazio %}
+        <form method="post" action="{{ url_for('pdv.cancelar') }}"
+              data-confirmar="Cancelar a venda e esvaziar o carrinho?">
+          {{ csrf() }}
+          <button class="btn btn-sm btn-outline-danger" type="submit">Cancelar venda</button>
+        </form>
+        {% endif %}
+      </div>
+
+      {% if resumo.vazio %}
+        <div class="card-body text-center text-muted py-4">Carrinho vazio. Adicione produtos ao lado.</div>
+      {% else %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Item</th>
+              <th class="text-end">Qtd.</th>
+              <th class="text-end">Subtotal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in resumo.linhas %}
+            <tr class="{{ 'table-warning' if l.problema }}">
+              <td>
+                <div class="fw-semibold">{{ l.produto.nome }}</div>
+                <div class="small text-muted">{{ l.preco_unitario|moeda }}/{{ l.produto.unidade_medida }}</div>
+              </td>
+              <td class="text-end">
+                <form method="post" action="{{ url_for('pdv.alterar_quantidade', produto_id=l.produto.id) }}"
+                      class="d-inline-flex gap-1">
+                  {{ csrf() }}
+                  <input type="text" name="quantidade" value="{{ l.quantidade|quantidade }}"
+                         inputmode="decimal" class="form-control form-control-sm text-end"
+                         style="width: 72px;" aria-label="Quantidade de {{ l.produto.nome }}">
+                  <button class="btn btn-sm btn-outline-secondary" type="submit"
+                          title="Atualizar quantidade">OK</button>
+                </form>
+              </td>
+              <td class="text-end fw-semibold">{{ l.subtotal|moeda }}</td>
+              <td class="text-end">
+                <form method="post" action="{{ url_for('pdv.remover_item', produto_id=l.produto.id) }}">
+                  {{ csrf() }}
+                  <button class="btn btn-sm btn-outline-danger" type="submit"
+                          aria-label="Remover {{ l.produto.nome }}">×</button>
+                </form>
+              </td>
+            </tr>
+            {% if l.problema %}
+            <tr class="table-warning">
+              <td colspan="4" class="small text-danger pt-0">⚠ {{ l.problema }} Ajuste a quantidade ou remova o item.</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-body border-top">
+        <div class="d-flex justify-content-between">
+          <span>Subtotal</span><span>{{ resumo.subtotal|moeda }}</span>
+        </div>
+
+        {% if resumo.desconto > 0 %}
+        <div class="d-flex justify-content-between text-success align-items-center">
+          <span>
+            Desconto
+            <form method="post" action="{{ url_for('pdv.remover_desconto') }}" class="d-inline">
+              {{ csrf() }}
+              <button class="btn btn-link btn-sm p-0 align-baseline" type="submit">remover</button>
+            </form>
+          </span>
+          <span>− {{ resumo.desconto|moeda }}</span>
+        </div>
+        {% else %}
+        <form method="post" action="{{ url_for('pdv.aplicar_desconto') }}" class="row g-1 my-2">
+          {{ csrf() }}
+          <div class="col-auto">
+            <select name="tipo" class="form-select form-select-sm" aria-label="Tipo de desconto">
+              {% for chave, simbolo in tipos_desconto.items() %}
+                <option value="{{ chave }}">{{ simbolo }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col">
+            <input type="text" name="valor" inputmode="decimal" class="form-control form-control-sm"
+                   placeholder="Desconto (máx. {{ desconto_maximo|quantidade }}%)"
+                   aria-label="Valor do desconto">
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-sm btn-outline-secondary" type="submit">Aplicar</button>
+          </div>
+        </form>
+        {% endif %}
+
+        <div class="d-flex justify-content-between align-items-baseline border-top mt-2 pt-2">
+          <span class="h5 mb-0">Total</span>
+          <span class="h3 mb-0 text-success">{{ resumo.total|moeda }}</span>
+        </div>
+      </div>
+
+      <div class="card-footer bg-white">
+        <form method="post" action="{{ url_for('pdv.finalizar') }}" id="form-finalizar"
+              data-total="{{ resumo.total }}">
+          {{ csrf() }}
+          <input type="hidden" name="token" value="{{ token }}">
+
+          <div class="mb-2 small text-muted">Forma de pagamento</div>
+          <div class="btn-group w-100 mb-3" role="group" aria-label="Forma de pagamento">
+            {% for chave, nome in formas.items() %}
+              <input type="radio" class="btn-check" name="forma" id="forma-{{ chave }}"
+                     value="{{ chave }}" {{ 'checked' if chave == 'DINHEIRO' }}>
+              <label class="btn btn-outline-success btn-sm" for="forma-{{ chave }}">{{ nome }}</label>
+            {% endfor %}
+          </div>
+
+          <div id="campo-recebido" class="mb-3">
+            <label class="form-label small mb-1" for="valor_recebido">Valor recebido (opcional)</label>
+            <input type="text" name="valor_recebido" id="valor_recebido" inputmode="decimal"
+                   class="form-control" placeholder="Em branco = valor exato" autocomplete="off">
+            <div class="form-text">Troco: <strong id="troco">valor exato</strong></div>
+          </div>
+
+          <button type="submit" id="botao-finalizar" class="btn btn-success btn-lg w-100"
+                  {{ 'disabled' if resumo.tem_problema }}>
+            Finalizar venda · {{ resumo.total|moeda }}
+          </button>
+          {% if resumo.tem_problema %}
+            <div class="form-text text-danger">Resolva os avisos do carrinho para finalizar.</div>
+          {% endif %}
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pdv.js') }}"></script>
+{% endblock %}
