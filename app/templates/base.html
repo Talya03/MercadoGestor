@@ -55,6 +55,10 @@
           <a class="nav-link {{ 'active' if request.endpoint == 'financeiro.resumo' }}"
              href="{{ url_for('financeiro.resumo') }}">Resumo mensal</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'relatorios' }}"
+             href="{{ url_for('relatorios.indice') }}">Relatórios</a>
+        </li>
       </ul>
     </aside>
 

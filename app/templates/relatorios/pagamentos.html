@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "relatorios/_filtro.html" import filtro %}
+{% block title %}Formas de pagamento · MercadoGestor{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Formas de pagamento</h1>
+{{ filtro('relatorios.pagamentos', de, ate) }}
+<div class="card" style="max-width: 640px;">
+  <table class="table align-middle mb-0">
+    <thead class="table-light"><tr><th>Forma</th><th class="text-end">Pagamentos</th><th class="text-end">Valor</th></tr></thead>
+    <tbody>
+      {% for l in linhas %}
+      <tr><td>{{ l.nome }}</td><td class="text-end">{{ l.quantidade }}</td><td class="text-end">{{ l.valor|moeda }}</td></tr>
+      {% else %}
+      <tr><td colspan="3" class="text-center text-muted py-4">Nenhuma venda neste período.</td></tr>
+      {% endfor %}
+    </tbody>
+    {% if linhas %}<tfoot class="table-light"><tr><th colspan="2">Total</th><th class="text-end">{{ total|moeda }}</th></tr></tfoot>{% endif %}
+  </table>
+</div>
+{% endblock %}

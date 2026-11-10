@@ -1,8 +1,77 @@
 {% extends "base.html" %}
+{% block title %}Início · MercadoGestor{% endblock %}
+
+{% macro cartao(rotulo, valor, detalhe=None, perigo=False) %}
+<div class="col-sm-6 col-xl-3">
+  <div class="card h-100 {{ 'border-danger' if perigo }}"><div class="card-body py-3">
+    <div class="small text-muted">{{ rotulo }}</div>
+    <div class="fs-4 fw-semibold {{ 'text-danger' if perigo }}">{{ valor }}</div>
+    {% if detalhe %}<div class="small text-muted">{{ detalhe }}</div>{% endif %}
+  </div></div>
+</div>
+{% endmacro %}
+
 {% block content %}
-<div class="p-5 bg-light rounded-3">
-  <h1 class="display-6">Bem-vinda ao MercadoGestor</h1>
-  <p class="lead">Sistema de gestão para mercados locais.</p>
-  <p class="text-muted mb-0">Fase 2 concluída: a estrutura inicial está funcionando.</p>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Início</h1>
+  <a href="{{ url_for('pdv.tela') }}" class="btn btn-success">Abrir o PDV</a>
+</div>
+
+<div class="row g-3 mb-4">
+  {{ cartao('Vendas de hoje', p.vendas_hoje_total|moeda,
+            (p.vendas_hoje_qtd ~ ' venda' ~ ('s' if p.vendas_hoje_qtd != 1 else '') ~ ' · ticket médio ' ~ (p.ticket_medio_hoje|moeda)) if p.vendas_hoje_qtd else 'Nenhuma venda ainda hoje') }}
+  {{ cartao('Ontem', p.vendas_ontem_total|moeda) }}
+  {{ cartao('Estoque baixo', p.estoque_baixo_total ~ ' produto' ~ ('s' if p.estoque_baixo_total != 1 else ''),
+            'Saldo no mínimo ou abaixo', perigo=p.estoque_baixo_total > 0) }}
+  {{ cartao('Contas vencidas', p.contas_vencido|moeda, 'A pagar no total: ' ~ (p.contas_pendente|moeda), perigo=p.contas_vencido > 0) }}
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between"><span>Estoque baixo</span>
+        <a href="{{ url_for('estoque.lista', baixo=1) }}" class="small">Ver todos</a></div>
+      <ul class="list-group list-group-flush">
+        {% for pr in p.estoque_baixo %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span>{{ pr.nome }}</span>
+          <span class="{{ 'text-danger fw-semibold' if pr.quantidade_estoque == 0 }}">
+            {{ pr.quantidade_estoque|quantidade }} / mín. {{ pr.estoque_minimo|quantidade }} {{ pr.unidade_medida }}</span>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted">Nenhum produto com estoque baixo.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between"><span>Contas a vencer (7 dias)</span>
+        <a href="{{ url_for('financeiro.lista') }}" class="small">Financeiro</a></div>
+      <ul class="list-group list-group-flush">
+        {% for l in p.contas_a_vencer %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span>{{ l.descricao }}
+            {% if l.vencimento < p.hoje %}<span class="badge text-bg-danger">Vencida</span>{% endif %}</span>
+          <span class="text-nowrap">{{ l.vencimento.strftime('%d/%m') }} · {{ l.valor|moeda }}</span>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted">Nenhuma conta vencida ou a vencer em 7 dias.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between"><span>Mês atual</span>
+        <a href="{{ url_for('financeiro.resumo') }}" class="small">Resumo completo</a></div>
+      <div class="card-body row text-center g-2">
+        <div class="col-sm-4"><div class="small text-muted">Vendas</div><div class="fs-5">{{ p.mes.vendas|moeda }}</div></div>
+        <div class="col-sm-4"><div class="small text-muted">Lucro bruto</div><div class="fs-5">{{ p.mes.lucro_bruto|moeda }}</div></div>
+        <div class="col-sm-4"><div class="small text-muted">Resultado</div>
+          <div class="fs-5 {{ 'text-danger' if p.mes.resultado < 0 }}">{{ p.mes.resultado|moeda }}</div></div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

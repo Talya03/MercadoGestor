@@ -1,0 +1,25 @@
+{% macro filtro(endpoint, de, ate, ordem=None, ordens=None) %}
+<form method="get" class="row g-2 mb-3 align-items-end no-print">
+  <div class="col-sm-3">
+    <label class="form-label small mb-1" for="de">De</label>
+    <input type="date" name="de" id="de" class="form-control" value="{{ de.isoformat() }}" required>
+  </div>
+  <div class="col-sm-3">
+    <label class="form-label small mb-1" for="ate">Até</label>
+    <input type="date" name="ate" id="ate" class="form-control" value="{{ ate.isoformat() }}" required>
+  </div>
+  {% if ordens %}
+  <div class="col-sm-3">
+    <label class="form-label small mb-1" for="ordem">Ordenar por</label>
+    <select name="ordem" id="ordem" class="form-select">
+      {% for chave, rotulo in ordens.items() %}<option value="{{ chave }}" {{ 'selected' if ordem == chave }}>{{ rotulo }}</option>{% endfor %}
+    </select>
+  </div>
+  {% endif %}
+  <div class="col-auto d-flex gap-2">
+    <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
+    <a class="btn btn-outline-success"
+       href="{{ url_for(endpoint, de=de.isoformat(), ate=ate.isoformat(), ordem=ordem, formato='csv') }}">Baixar CSV</a>
+  </div>
+</form>
+{% endmacro %}

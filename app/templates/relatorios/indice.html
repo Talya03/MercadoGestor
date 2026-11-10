@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Relatórios · MercadoGestor{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Relatórios</h1>
+<p class="text-muted">Período inicial sugerido: {{ de.strftime('%d/%m/%Y') }} a {{ ate.strftime('%d/%m/%Y') }} (mês atual). Dá para mudar em cada relatório.</p>
+<div class="row g-3" style="max-width: 900px;">
+  {% for rotulo, desc, ep in [
+    ('Produtos mais vendidos', 'Quantidade, receita, custo e lucro por produto.', 'relatorios.produtos'),
+    ('Formas de pagamento', 'Quanto entrou em dinheiro, Pix e cartões.', 'relatorios.pagamentos'),
+    ('Vendas por dia', 'Número de vendas, descontos, total e ticket médio de cada dia.', 'relatorios.dias')] %}
+  <div class="col-md-4">
+    <a href="{{ url_for(ep) }}" class="card h-100 text-decoration-none">
+      <div class="card-body"><h2 class="h6">{{ rotulo }}</h2><p class="small text-muted mb-0">{{ desc }}</p></div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

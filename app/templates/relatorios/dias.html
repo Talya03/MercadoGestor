@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "relatorios/_filtro.html" import filtro %}
+{% block title %}Vendas por dia · MercadoGestor{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Vendas por dia</h1>
+{{ filtro('relatorios.dias', de, ate) }}
+<div class="card" style="max-width: 760px;">
+  <table class="table table-hover align-middle mb-0">
+    <thead class="table-light"><tr><th>Dia</th><th class="text-end">Vendas</th><th class="text-end">Desconto</th>
+      <th class="text-end">Total</th><th class="text-end">Ticket médio</th></tr></thead>
+    <tbody>
+      {% for l in linhas %}
+      <tr>
+        <td>{{ l.data.strftime('%d/%m/%Y') }}</td><td class="text-end">{{ l.quantidade }}</td>
+        <td class="text-end text-muted">{{ l.desconto|moeda if l.desconto > 0 else '—' }}</td>
+        <td class="text-end fw-semibold">{{ l.total|moeda }}</td><td class="text-end">{{ l.ticket_medio|moeda }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="text-center text-muted py-4">Nenhuma venda neste período.</td></tr>
+      {% endfor %}
+    </tbody>
+    {% if linhas %}<tfoot class="table-light"><tr><th>Total</th><th class="text-end">{{ totais[0] }}</th>
+      <th class="text-end">{{ totais[1]|moeda }}</th><th class="text-end">{{ totais[2]|moeda }}</th><th></th></tr></tfoot>{% endif %}
+  </table>
+</div>
+<p class="text-muted small mt-2">Dias sem venda não aparecem.</p>
+{% endblock %}
