@@ -55,5 +55,14 @@
     document.getElementById("registrar").disabled = true;
   });
 
+  // O vencimento só faz sentido para compra a prazo.
+  const condicao = document.getElementById("condicao");
+  const grupoVenc = document.getElementById("grupo-vencimento");
+  function atualizarVencimento() {
+    grupoVenc.style.display = condicao.value === "A_PRAZO" ? "" : "none";
+  }
+  condicao.addEventListener("change", atualizarVencimento);
+  atualizarVencimento();
+
   atualizarTotal();
 })();

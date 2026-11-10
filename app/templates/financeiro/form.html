@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% set titulo = 'Nova receita avulsa' if tipo == 'RECEITA' else 'Nova despesa / conta a pagar' %}
+{% block title %}{{ titulo }} · MercadoGestor{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">{{ titulo }}</h1>
+<div class="card" style="max-width: 600px;">
+  <div class="card-body">
+    <form method="post" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="tipo" value="{{ tipo }}">
+
+      <div class="mb-3">
+        <label class="form-label" for="categoria">Categoria</label>
+        <select name="categoria" id="categoria" class="form-select" autofocus>
+          <option value="">Selecione...</option>
+          {% for chave, nome in categorias %}
+          <option value="{{ chave }}" {{ 'selected' if valores.get('categoria') == chave }}>{{ nome }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="descricao">Descrição</label>
+        <input type="text" name="descricao" id="descricao" class="form-control" maxlength="120"
+               value="{{ valores.get('descricao', '') }}" placeholder="Ex.: Aluguel de novembro">
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-sm-6">
+          <label class="form-label" for="valor">Valor (R$)</label>
+          <input type="text" name="valor" id="valor" class="form-control" inputmode="decimal"
+                 value="{{ valores.get('valor', '') }}" placeholder="0,00">
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label" for="data">{{ 'Data' if tipo == 'RECEITA' else 'Vencimento' }}</label>
+          <input type="date" name="data" id="data" class="form-control"
+                 value="{{ valores.get('data', hoje.isoformat()) }}">
+        </div>
+      </div>
+
+      {% if tipo == 'DESPESA' %}
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" name="ja_pago" value="1" id="ja_pago"
+               {{ 'checked' if valores.get('ja_pago') == '1' }}>
+        <label class="form-check-label" for="ja_pago">Já foi paga</label>
+      </div>
+      <div class="mb-3" id="grupo-pagamento">
+        <label class="form-label" for="data_pagamento">Data do pagamento</label>
+        <input type="date" name="data_pagamento" id="data_pagamento" class="form-control"
+               value="{{ valores.get('data_pagamento', hoje.isoformat()) }}" max="{{ hoje.isoformat() }}">
+      </div>
+      {% else %}
+      <p class="text-muted small">Receitas avulsas (aluguel de espaço, comissão...) entram como já recebidas.
+        As vendas do PDV não precisam ser lançadas aqui.</p>
+      {% endif %}
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-success">Salvar</button>
+        <a href="{{ url_for('financeiro.lista') }}" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const marca = document.getElementById("ja_pago");
+    const grupo = document.getElementById("grupo-pagamento");
+    if (!marca || !grupo) return;
+    function atualizar() { grupo.style.display = marca.checked ? "" : "none"; }
+    marca.addEventListener("change", atualizar);
+    atualizar();
+  })();
+</script>
+{% endblock %}

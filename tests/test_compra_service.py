@@ -11,6 +11,7 @@ from app.models import Compra, ItemCompra, MovimentacaoEstoque
 from app.services import categoria_service, compra_service as svc, estoque_service
 from app.services import fornecedor_service, produto_service
 from app.utils.erros import ErroDeNegocio
+from app.utils.hoje import hoje_local
 
 _n = count(1)
 
@@ -283,7 +284,7 @@ def test_buscar_e_listar_com_filtros(fornecedor, categoria):
     assert svc.buscar(c1.id).fornecedor.nome == "Distribuidora Bom Preço"
     assert [c.id for c in svc.listar()] == [c2.id, c1.id]  # mais recente primeiro
     assert [c.id for c in svc.listar(fornecedor_id=outro.id)] == [c2.id]
-    hoje = c1.data_hora.date()
+    hoje = hoje_local()  # dia do MERCADO (e não a data em UTC, que já vira "amanhã" às 21h)
     assert len(svc.listar(hoje, hoje)) == 2
     from datetime import timedelta
 

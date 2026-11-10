@@ -13,6 +13,15 @@
       <dt class="col-sm-3">Fornecedor</dt><dd class="col-sm-9">{{ compra.fornecedor.nome }}</dd>
       <dt class="col-sm-3">Data e hora</dt><dd class="col-sm-9">{{ compra.data_hora|data_hora }}</dd>
       <dt class="col-sm-3">Nº da nota</dt><dd class="col-sm-9">{{ compra.numero_documento or "—" }}</dd>
+      <dt class="col-sm-3">Pagamento</dt>
+      <dd class="col-sm-9">
+        {% set l = compra.lancamento %}
+        {% if l %}
+          {% if l.pago_em %}<span class="badge text-bg-success">Pago em {{ l.pago_em.strftime('%d/%m/%Y') }}</span>
+          {% else %}<span class="badge text-bg-warning">A pagar · vence {{ l.vencimento.strftime('%d/%m/%Y') }}</span>{% endif %}
+          <a href="{{ url_for('financeiro.lista', status='todos') }}" class="ms-2 small">Ver no Financeiro</a>
+        {% else %}—{% endif %}
+      </dd>
       <dt class="col-sm-3">Observação</dt><dd class="col-sm-9 mb-0">{{ compra.observacao or "—" }}</dd>
     </dl>
   </div>

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Resumo mensal · MercadoGestor{% endblock %}
+{% set meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'] %}
+
+{% macro linha(rotulo, valor, forte=False, sinal=None, ajuda=None) %}
+<tr class="{{ 'table-light fw-bold' if forte }}">
+  <td>{{ rotulo }}{% if ajuda %}<div class="small text-muted fw-normal">{{ ajuda }}</div>{% endif %}</td>
+  <td class="text-end text-nowrap {{ 'text-danger' if valor < 0 }}">{{ sinal or '' }}{{ valor|moeda }}</td>
+</tr>
+{% endmacro %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Resumo de {{ meses[r.mes - 1] }} de {{ r.ano }}</h1>
+  <form method="get" class="d-flex gap-2 align-items-center">
+    {% if anterior %}<a class="btn btn-outline-secondary" href="{{ url_for('financeiro.resumo', mes=anterior) }}">‹</a>{% endif %}
+    <input type="month" name="mes" value="{{ mes_valor }}" class="form-control" aria-label="Mês">
+    <button class="btn btn-outline-secondary" type="submit">Ver</button>
+    {% if proximo %}<a class="btn btn-outline-secondary" href="{{ url_for('financeiro.resumo', mes=proximo) }}">›</a>{% endif %}
+  </form>
+</div>
+
+<div class="card mb-3" style="max-width: 680px;">
+  <table class="table mb-0 align-middle">
+    <tbody>
+      {{ linha('Vendas (' ~ r.qtd_vendas ~ ')', r.vendas, ajuda='Total das vendas do PDV no mês (já com descontos).') }}
+      {{ linha('Custo das mercadorias vendidas', r.custo_vendido, sinal='−', ajuda='Custo do produto no dia de cada venda.') }}
+      {{ linha('Lucro bruto' ~ (' · margem ' ~ (r.margem_bruta|string).replace('.', ',') ~ '%' if r.margem_bruta is not none else ''), r.lucro_bruto, forte=True) }}
+      {{ linha('Outras receitas', r.outras_receitas, sinal='+') }}
+      {{ linha('Despesas operacionais', r.despesas, sinal='−', ajuda='Pagas: ' ~ (r.despesas_pagas|moeda) ~ ' · Pendentes: ' ~ (r.despesas_pendentes|moeda)) }}
+      {{ linha('Resultado do mês', r.resultado, forte=True) }}
+    </tbody>
+  </table>
+</div>
+
+{% if r.despesas_por_categoria %}
+<div class="card mb-3" style="max-width: 680px;">
+  <div class="card-header">Despesas por categoria</div>
+  <table class="table mb-0">
+    <tbody>
+      {% for nome, valor in r.despesas_por_categoria %}
+      <tr><td>{{ nome }}</td><td class="text-end">{{ valor|moeda }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<p class="text-muted small" style="max-width: 680px;">
+  Compras de mercadoria no mês: <strong>{{ r.compras|moeda }}</strong>. Elas <em>não</em> são subtraídas aqui
+  porque o dinheiro das compras já aparece no custo das mercadorias vendidas (somar os dois contaria
+  duas vezes). O mês segue o horário do mercado. Despesas e receitas entram pelo mês do vencimento/data.
+  Este resumo é uma visão gerencial simples, não uma apuração contábil ou fiscal.
+</p>
+{% endblock %}

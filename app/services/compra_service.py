@@ -14,6 +14,8 @@ Numeração continua a de docs/02-vendas-pdv.md (detalhes em docs/03-compras.md)
 - RN38: o mesmo envio de formulário não gera duas compras (token de envio único).
 - RN39: compra concluída não é editada nem excluída (se errou, corrija com ajuste de
         estoque; estorno de compra: fase futura).
+- RN47: toda compra gera uma conta a pagar (despesa "Compra de mercadoria") NA MESMA
+        transação: à vista = já paga hoje; a prazo = pendente, com vencimento hoje ou depois.
 
 Exemplo de mercado: chegam 24 UN de leite a R$ 4,80 e 10 kg de tomate a R$ 6,20 da
 "Distribuidora Bom Preço": total R$ 177,20, estoque sobe e o custo dos produtos é atualizado.
@@ -25,10 +27,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 
 from app.extensions import db
-from app.models import Compra, Fornecedor, ItemCompra, Produto
+from app.models import CATEGORIA_MERCADORIA, Compra, Fornecedor, ItemCompra, Lancamento, Produto
 from app.services import estoque_service
 from app.utils.datas import intervalo_utc
 from app.utils.erros import ErroDeNegocio
+from app.utils.hoje import hoje_local
 from app.utils.numeros import validar_decimal
 
 CENTAVO = Decimal("0.01")
@@ -37,6 +40,13 @@ MAX_ITENS = 200
 TAMANHO_MAX_DOCUMENTO = 30
 TAMANHO_MAX_OBSERVACAO = 255
 LIMITE_LISTAGEM = 200
+
+
+def _converter_data(valor, rotulo):
+    # Import tardio: financeiro_service importa Compra; aqui só precisamos do conversor.
+    from app.services.financeiro_service import converter_data
+
+    return converter_data(valor, rotulo)
 
 
 def _normalizar(texto):
@@ -80,11 +90,13 @@ def _validar_item(bruto, numero):
     return produto, quantidade, custo, subtotal
 
 
-def registrar(fornecedor_id, itens, numero_documento=None, observacao=None, token_envio=None):
+def registrar(fornecedor_id, itens, numero_documento=None, observacao=None, token_envio=None,
+              condicao="A_VISTA", vencimento=None):
     """Registra a compra inteira de forma atômica (RN33 a RN38). Devolve a Compra.
 
     `itens`: lista de dicts com 'produto_id', 'quantidade' e 'custo_unitario'
     (texto digitado ou Decimal).
+    `condicao`: "A_VISTA" (paga hoje) ou "A_PRAZO" (pendente, exige `vencimento`; RN47).
     """
     fornecedor = db.session.get(Fornecedor, fornecedor_id) if fornecedor_id else None
     if fornecedor is None:
@@ -99,6 +111,17 @@ def registrar(fornecedor_id, itens, numero_documento=None, observacao=None, toke
     observacao = _texto_opcional(observacao, TAMANHO_MAX_OBSERVACAO, "A observação")
     if token_envio and compra_por_token(token_envio):
         raise ErroDeNegocio("Esta compra já foi registrada.")  # RN38
+    hoje = hoje_local()
+    if condicao == "A_PRAZO":
+        if vencimento in (None, ""):
+            raise ErroDeNegocio("Informe o vencimento da compra a prazo.")
+        vencimento = _converter_data(vencimento, "Vencimento")
+        if vencimento < hoje:
+            raise ErroDeNegocio("O vencimento não pode ser anterior a hoje.")
+    elif condicao == "A_VISTA":
+        vencimento = hoje
+    else:
+        raise ErroDeNegocio("Escolha se a compra foi à vista ou a prazo.")
 
     try:
         validados = []
@@ -145,6 +168,17 @@ def registrar(fornecedor_id, itens, numero_documento=None, observacao=None, toke
                 raise ErroDeNegocio(f"{produto.nome}: {erro}")
             produto.preco_custo = custo  # RN37
 
+        db.session.add(  # RN47: a conta a pagar nasce junto com a compra
+            Lancamento(
+                tipo="DESPESA",
+                categoria=CATEGORIA_MERCADORIA,
+                descricao=f"Compra #{compra.id} - {fornecedor.nome}"[:120],
+                valor=total,
+                vencimento=vencimento,
+                pago_em=hoje if condicao == "A_VISTA" else None,
+                compra_id=compra.id,
+            )
+        )
         db.session.commit()  # único commit: tudo vale junto (RN36)
     except ErroDeNegocio:
         db.session.rollback()

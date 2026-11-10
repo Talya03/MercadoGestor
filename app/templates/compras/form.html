@@ -87,9 +87,25 @@
     </div>
   </div>
 
+  <div class="card mb-3">
+    <div class="card-body row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label" for="condicao">Pagamento ao fornecedor</label>
+        <select name="condicao" id="condicao" class="form-select">
+          <option value="A_VISTA" {{ 'selected' if condicao != 'A_PRAZO' }}>À vista (já pago hoje)</option>
+          <option value="A_PRAZO" {{ 'selected' if condicao == 'A_PRAZO' }}>A prazo (conta a pagar)</option>
+        </select>
+      </div>
+      <div class="col-md-3" id="grupo-vencimento">
+        <label class="form-label" for="vencimento">Vencimento</label>
+        <input type="date" name="vencimento" id="vencimento" class="form-control" value="{{ vencimento }}">
+      </div>
+    </div>
+  </div>
+
   <p class="text-muted small">
     Ao registrar, o estoque de cada produto aumenta e o custo do produto passa a ser o custo desta compra.
-    O preço de venda não muda. A compra não pode ser editada depois.
+    O preço de venda não muda. A compra gera uma conta a pagar em Financeiro. A compra não pode ser editada depois.
   </p>
 
   <div class="d-flex gap-2">

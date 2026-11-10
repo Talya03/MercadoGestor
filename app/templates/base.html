@@ -47,6 +47,14 @@
           <a class="nav-link {{ 'active' if request.blueprint == 'compras' }}"
              href="{{ url_for('compras.lista') }}">Compras</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'financeiro' and request.endpoint != 'financeiro.resumo' }}"
+             href="{{ url_for('financeiro.lista') }}">Financeiro</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.endpoint == 'financeiro.resumo' }}"
+             href="{{ url_for('financeiro.resumo') }}">Resumo mensal</a>
+        </li>
       </ul>
     </aside>
 

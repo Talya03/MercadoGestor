@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Financeiro · MercadoGestor{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Financeiro</h1>
+  <div class="d-flex flex-wrap gap-2">
+    <a href="{{ url_for('financeiro.novo', tipo='DESPESA') }}" class="btn btn-success">+ Despesa / conta a pagar</a>
+    <a href="{{ url_for('financeiro.novo', tipo='RECEITA') }}" class="btn btn-outline-success">+ Receita avulsa</a>
+    <a href="{{ url_for('financeiro.resumo') }}" class="btn btn-outline-secondary">Resumo mensal</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-sm-6"><div class="card"><div class="card-body py-2">
+    <div class="small text-muted">A pagar (pendente)</div><div class="fs-5 fw-semibold">{{ total_pendente|moeda }}</div>
+  </div></div></div>
+  <div class="col-sm-6"><div class="card {{ 'border-danger' if total_vencido > 0 }}"><div class="card-body py-2">
+    <div class="small text-muted">Vencido</div>
+    <div class="fs-5 fw-semibold {{ 'text-danger' if total_vencido > 0 }}">{{ total_vencido|moeda }}</div>
+  </div></div></div>
+</div>
+
+<form method="get" class="row g-2 mb-3 align-items-end">
+  <div class="col-sm-2">
+    <label class="form-label small mb-1" for="status">Situação</label>
+    <select name="status" id="status" class="form-select">
+      {% for v, r in [('pendentes','A pagar'),('pagos','Pagos/recebidos'),('todos','Todos')] %}
+      <option value="{{ v }}" {{ 'selected' if status == v }}>{{ r }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-sm-2">
+    <label class="form-label small mb-1" for="tipo">Tipo</label>
+    <select name="tipo" id="tipo" class="form-select">
+      <option value="">Todos</option>
+      <option value="DESPESA" {{ 'selected' if tipo == 'DESPESA' }}>Despesas</option>
+      <option value="RECEITA" {{ 'selected' if tipo == 'RECEITA' }}>Receitas</option>
+    </select>
+  </div>
+  <div class="col-sm-3">
+    <label class="form-label small mb-1" for="de">Vencimento de</label>
+    <input type="date" name="de" id="de" class="form-control" value="{{ data_inicio.isoformat() if data_inicio }}">
+  </div>
+  <div class="col-sm-3">
+    <label class="form-label small mb-1" for="ate">até</label>
+    <input type="date" name="ate" id="ate" class="form-control" value="{{ data_fim.isoformat() if data_fim }}">
+  </div>
+  <div class="col-auto"><button class="btn btn-outline-secondary" type="submit">Filtrar</button></div>
+</form>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr><th>Vencimento</th><th>Descrição</th><th>Categoria</th><th class="text-end">Valor</th><th>Situação</th><th class="text-end">Ações</th></tr>
+      </thead>
+      <tbody>
+        {% for l in lancamentos %}
+        <tr>
+          <td class="text-nowrap">{{ l.vencimento.strftime('%d/%m/%Y') }}</td>
+          <td>
+            {{ l.descricao }}
+            {% if l.compra_id %}<a class="small" href="{{ url_for('compras.detalhe', compra_id=l.compra_id) }}">(compra)</a>{% endif %}
+          </td>
+          <td class="text-muted">{{ l.categoria_nome }}</td>
+          <td class="text-end fw-semibold {{ 'text-success' if l.tipo == 'RECEITA' }}">
+            {{ '+' if l.tipo == 'RECEITA' else '−' }}{{ l.valor|moeda }}
+          </td>
+          <td>
+            {% if l.pago_em %}
+              <span class="badge text-bg-success">{{ 'Recebido' if l.tipo == 'RECEITA' else 'Pago' }} {{ l.pago_em.strftime('%d/%m') }}</span>
+            {% elif vencida(l) %}<span class="badge text-bg-danger">Vencida</span>
+            {% else %}<span class="badge text-bg-warning">A pagar</span>{% endif %}
+          </td>
+          <td class="text-end text-nowrap">
+            {% if l.tipo == 'DESPESA' %}
+              {% if not l.pago_em %}
+              <form method="post" action="{{ url_for('financeiro.pagar', lancamento_id=l.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="voltar" value="{{ voltar }}">
+                <input type="date" name="data_pagamento" value="{{ hoje.isoformat() }}" max="{{ hoje.isoformat() }}"
+                       class="form-control form-control-sm d-inline-block" style="width: 9.5rem;" aria-label="Data do pagamento">
+                <button class="btn btn-sm btn-success" type="submit">Pagar</button>
+              </form>
+              {% if not l.compra_id %}
+              <form method="post" action="{{ url_for('financeiro.cancelar', lancamento_id=l.id) }}" class="d-inline"
+                    data-confirmar='Cancelar "{{ l.descricao }}"?'>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="voltar" value="{{ voltar }}">
+                <button class="btn btn-sm btn-outline-danger" type="submit">Cancelar</button>
+              </form>
+              {% endif %}
+              {% else %}
+              <form method="post" action="{{ url_for('financeiro.desfazer', lancamento_id=l.id) }}" class="d-inline"
+                    data-confirmar="Desfazer o pagamento? A conta volta a ficar pendente.">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="voltar" value="{{ voltar }}">
+                <button class="btn btn-sm btn-outline-secondary" type="submit">Desfazer pagamento</button>
+              </form>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-4">Nada por aqui neste filtro.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% if lancamentos|length >= limite %}
+<p class="text-muted small mt-2">Mostrando os {{ limite }} primeiros. Use os filtros de data para refinar.</p>
+{% endif %}
+{% endblock %}

@@ -50,7 +50,8 @@ def _itens_do_formulario():
     return itens
 
 
-def _tela_nova(fornecedor_id=None, itens=None, documento="", observacao="", token=None):
+def _tela_nova(fornecedor_id=None, itens=None, documento="", observacao="", token=None,
+               condicao="A_VISTA", vencimento=""):
     return render_template(
         "compras/form.html",
         fornecedores=fornecedor_service.listar(),
@@ -60,6 +61,8 @@ def _tela_nova(fornecedor_id=None, itens=None, documento="", observacao="", toke
         documento=documento,
         observacao=observacao,
         token=token or str(uuid.uuid4()),
+        condicao=condicao,
+        vencimento=vencimento,
     )
 
 
@@ -100,12 +103,16 @@ def nova():
     itens = _itens_do_formulario()
     documento = request.form.get("numero_documento", "")
     observacao = request.form.get("observacao", "")
+    condicao = request.form.get("condicao", "A_VISTA")
+    vencimento = request.form.get("vencimento", "")
     try:
-        compra = compra_service.registrar(fornecedor_id, itens, documento, observacao, token)
+        compra = compra_service.registrar(
+            fornecedor_id, itens, documento, observacao, token, condicao, vencimento
+        )
     except ErroDeNegocio as erro:
         flash(str(erro), "danger")
         # Reexibe tudo o que foi digitado, com o MESMO token (a compra ainda não existe).
-        return _tela_nova(fornecedor_id, itens, documento, observacao, token or None)
+        return _tela_nova(fornecedor_id, itens, documento, observacao, token or None, condicao, vencimento)
 
     flash(f"Compra #{compra.id} registrada. O estoque foi atualizado.", "success")
     return redirect(url_for("compras.detalhe", compra_id=compra.id))

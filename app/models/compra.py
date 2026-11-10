@@ -31,6 +31,8 @@ class Compra(db.Model):
 
     fornecedor = db.relationship("Fornecedor", back_populates="compras")
     itens = db.relationship("ItemCompra", back_populates="compra", order_by="ItemCompra.id")
+    # Conta a pagar gerada por esta compra (à vista = já paga; a prazo = pendente).
+    lancamento = db.relationship("Lancamento", back_populates="compra", uselist=False)
 
     def __repr__(self):
         return f"<Compra {self.id} total={self.total}>"
