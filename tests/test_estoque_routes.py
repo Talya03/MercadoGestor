@@ -9,6 +9,7 @@ from app import create_app
 from app.extensions import db
 from app.models import Produto
 from app.services import categoria_service, estoque_service, produto_service
+from tests.conftest import entrar
 from config import TestConfig
 
 _codigos = count(1)
@@ -325,7 +326,9 @@ def client_com_csrf():
         db.create_all()
         cat = categoria_service.criar("Laticínios")
         novo_produto(cat)
-        yield app.test_client()
+        cliente = app.test_client()
+        entrar(cliente)  # logado: o CSRF precisa funcionar também para quem já entrou
+        yield cliente
         db.session.remove()
         db.drop_all()
 

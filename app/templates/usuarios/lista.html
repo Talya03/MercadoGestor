@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Usuários · MercadoGestor{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Usuários</h1>
+  <a href="{{ url_for('usuarios.novo') }}" class="btn btn-success">+ Novo usuário</a>
+</div>
+<div class="card"><div class="table-responsive">
+  <table class="table table-hover align-middle mb-0">
+    <thead class="table-light"><tr><th>Nome</th><th>Login</th><th>Perfil</th><th>Status</th><th>Último acesso</th><th class="text-end">Ações</th></tr></thead>
+    <tbody>
+      {% for u in usuarios %}
+      <tr>
+        <td class="fw-semibold">{{ u.nome }}{% if u.id == usuario_atual.id %} <span class="badge text-bg-light">você</span>{% endif %}</td>
+        <td class="text-muted">{{ u.login }}</td>
+        <td>{{ u.perfil_nome }}</td>
+        <td>
+          {% if not u.ativo %}<span class="badge text-bg-secondary">Inativo</span>
+          {% else %}<span class="badge text-bg-success">Ativo</span>{% endif %}
+          {% if u.trocar_senha %}<span class="badge text-bg-warning">Senha temporária</span>{% endif %}
+        </td>
+        <td class="text-muted">{{ u.ultimo_acesso|data_hora if u.ultimo_acesso else 'Nunca' }}</td>
+        <td class="text-end text-nowrap">
+          <a href="{{ url_for('usuarios.editar', usuario_id=u.id) }}" class="btn btn-sm btn-outline-primary">Editar</a>
+          <form method="post" action="{{ url_for('usuarios.redefinir_senha', usuario_id=u.id) }}" class="d-inline"
+                data-confirmar='Gerar uma nova senha temporária para "{{ u.nome }}"? A senha atual deixa de valer.'>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-secondary" type="submit">Redefinir senha</button>
+          </form>
+          {% if u.id != usuario_atual.id %}
+          <form method="post" action="{{ url_for('usuarios.alternar', usuario_id=u.id) }}" class="d-inline"
+                {% if u.ativo %}data-confirmar='Desativar "{{ u.nome }}"? Ele(a) será desconectado(a).'{% endif %}>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if u.ativo %}<button class="btn btn-sm btn-outline-danger" type="submit">Desativar</button>
+            {% else %}<button class="btn btn-sm btn-outline-success" type="submit">Reativar</button>{% endif %}
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+<p class="text-muted small mt-2">Perfis: <strong>Dono</strong> acessa tudo; <strong>Gerente</strong> cuida de produtos, estoque, compras e relatórios;
+  <strong>Caixa</strong> só usa o PDV e as vendas.</p>
+{% endblock %}

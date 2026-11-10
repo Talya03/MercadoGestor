@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Senha temporária · MercadoGestor{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">{{ 'Usuário criado' if novo else 'Senha redefinida' }}</h1>
+<div class="card border-warning" style="max-width: 560px;"><div class="card-body">
+  <p>Passe estes dados para <strong>{{ usuario.nome }}</strong>:</p>
+  <dl class="row mb-3">
+    <dt class="col-4">Login</dt><dd class="col-8"><code>{{ usuario.login }}</code></dd>
+    <dt class="col-4">Senha temporária</dt><dd class="col-8"><code class="fs-5">{{ senha }}</code></dd>
+  </dl>
+  <div class="alert alert-warning mb-3">Esta senha <strong>aparece só agora</strong>: anote ou copie antes de sair desta página.
+    No primeiro acesso a pessoa será obrigada a trocá-la.</div>
+  <a href="{{ url_for('usuarios.lista') }}" class="btn btn-success">Concluir</a>
+</div></div>
+{% endblock %}

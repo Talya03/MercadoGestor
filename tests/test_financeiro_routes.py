@@ -13,6 +13,7 @@ from app.models import Compra, Lancamento
 from app.services import categoria_service, fornecedor_service, produto_service
 from app.services import financeiro_service as fin
 from app.utils.hoje import hoje_local
+from tests.conftest import entrar
 from config import TestConfig
 
 _n = count(1)
@@ -188,7 +189,9 @@ def client_csrf(app):
     app2 = create_app(Cfg)
     with app2.app_context():
         db.create_all()
-        yield app2.test_client()
+        cliente = app2.test_client()
+        entrar(cliente)
+        yield cliente
         db.session.remove()
         db.drop_all()
 

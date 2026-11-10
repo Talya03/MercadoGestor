@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Trocar senha · MercadoGestor{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Trocar senha</h1>
+{% if obrigatoria %}
+<div class="alert alert-warning" style="max-width: 520px;">Você está usando uma senha temporária. Escolha uma senha só sua para continuar.</div>
+{% endif %}
+<div class="card" style="max-width: 520px;"><div class="card-body">
+  <form method="post" autocomplete="off">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mb-3">
+      <label class="form-label" for="atual">Senha atual{% if obrigatoria %} (a temporária){% endif %}</label>
+      <input type="password" class="form-control" id="atual" name="atual" autocomplete="current-password" autofocus required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="nova">Nova senha</label>
+      <input type="password" class="form-control" id="nova" name="nova" autocomplete="new-password" required>
+      <div class="form-text">Pelo menos 8 caracteres, diferente da atual e do seu login.</div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="nova2">Repita a nova senha</label>
+      <input type="password" class="form-control" id="nova2" name="nova2" autocomplete="new-password" required>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-success">Salvar</button>
+      {% if not obrigatoria %}<a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">Cancelar</a>{% endif %}
+    </div>
+  </form>
+</div></div>
+{% endblock %}

@@ -19,6 +19,7 @@ pip install -r requirements.txt
 
 # 3. Executar
 python run.py
+# No primeiro acesso o sistema pede para criar o usuário DONO (login e senha).
 ```
 
 Acesse http://127.0.0.1:5000
@@ -47,7 +48,8 @@ MercadoGestor/
 
 | Variável | Para quê | Padrão |
 |---|---|---|
-| `SECRET_KEY` | Assina a sessão e o CSRF. **Defina um valor longo e aleatório antes de qualquer uso real.** | valor de desenvolvimento |
+| `SECRET_KEY` | Assina o cookie de sessão (quem a conhece forja um login) e o CSRF. Se não for definida, o sistema gera uma chave aleatória e a guarda em `instance/secret_key` (**não compartilhe nem versione essa pasta**). | gerada automaticamente |
+| `SESSAO_HORAS` | Por quanto tempo uma sessão fica válida, em horas | `12` |
 | `DATABASE_URL` | Troca o banco | SQLite em `instance/mercadogestor.db` |
 | `DESCONTO_MAXIMO_PERCENTUAL` | Desconto máximo do caixa, em % do total | `10` |
 
@@ -62,3 +64,4 @@ MercadoGestor/
 - **v0.8**: Fornecedores (cadastro, busca, desativar/reativar) e Compras de mercadoria: vários itens por compra, entrada automática no estoque na mesma transação, custo do produto atualizado pela última compra, proteção contra compra duplicada. Regras RN31–RN39 (`docs/03-compras.md`).
 - **v0.9**: Financeiro: despesas e receitas avulsas, contas a pagar (pagar, desfazer pagamento, cancelar), compra à vista/a prazo gerando a conta na mesma transação, e resumo mensal (vendas, custo das mercadorias vendidas, lucro bruto, despesas, resultado). Regras RN40–RN47 (`docs/04-financeiro.md`).
 - **v0.10**: Página inicial com painel (vendas de hoje, estoque baixo, contas a vencer, mês atual) e Relatórios (produtos mais vendidos, formas de pagamento, vendas por dia) com exportação CSV segura para Excel. Regras RN48–RN55 (`docs/05-relatorios-dashboard.md`).
+- **v0.11**: Segurança de acesso: login, perfis (dono, gerente, caixa), proteção de **todas** as rotas (negar por padrão), tela de primeiro acesso, bloqueio após erros de senha, troca obrigatória de senha temporária, gestão de usuários e chave secreta automática. Regras RN56–RN66 (`docs/06-usuarios-seguranca.md`).

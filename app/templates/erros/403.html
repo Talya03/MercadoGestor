@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Acesso negado · MercadoGestor{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 560px;">
+  <div class="card-body">
+    <h1 class="h4">Acesso negado</h1>
+    <p class="mb-3">O seu perfil{% if usuario_atual %} ({{ usuario_atual.perfil_nome }}){% endif %} não tem permissão para abrir esta página.
+      Se você precisa dela, peça ao dono do mercado.</p>
+    <a href="{{ url_for('main.index') }}" class="btn btn-success">Voltar ao início</a>
+  </div>
+</div>
+{% endblock %}

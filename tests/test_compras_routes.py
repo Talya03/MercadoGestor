@@ -10,6 +10,7 @@ from app import create_app
 from app.extensions import db
 from app.models import Compra, Fornecedor, Produto
 from app.services import categoria_service, fornecedor_service, produto_service
+from tests.conftest import entrar
 from config import TestConfig
 
 _n = count(1)
@@ -227,7 +228,9 @@ def client_csrf(app):
     app2 = create_app(Cfg)
     with app2.app_context():
         db.create_all()
-        yield app2.test_client()
+        cliente = app2.test_client()
+        entrar(cliente)
+        yield cliente
         db.session.remove()
         db.drop_all()
 

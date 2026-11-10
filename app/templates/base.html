@@ -10,6 +10,15 @@
 <body>
   <nav class="navbar navbar-dark bg-success px-3 no-print">
     <span class="navbar-brand mb-0 h1">MercadoGestor</span>
+    {% if usuario_atual %}
+    <span class="d-flex align-items-center gap-2 text-white">
+      <a class="text-white small" href="{{ url_for('auth.trocar_senha') }}">{{ usuario_atual.nome }} ({{ usuario_atual.perfil_nome }})</a>
+      <form method="post" action="{{ url_for('auth.logout') }}" class="d-inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-outline-light">Sair</button>
+      </form>
+    </span>
+    {% endif %}
   </nav>
 
   <div class="d-flex">
@@ -19,46 +28,72 @@
           <a class="nav-link {{ 'active' if request.endpoint == 'main.index' }}"
              href="{{ url_for('main.index') }}">Início</a>
         </li>
+{% if pode('vender') %}
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.endpoint == 'pdv.tela' }}"
              href="{{ url_for('pdv.tela') }}">PDV (caixa)</a>
         </li>
+        {% endif %}
+{% if pode('vender') %}
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.endpoint in ('pdv.vendas', 'pdv.comprovante') }}"
              href="{{ url_for('pdv.vendas') }}">Vendas</a>
         </li>
+        {% endif %}
+{% if pode('catalogo') %}
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.blueprint == 'categorias' }}"
              href="{{ url_for('categorias.lista') }}">Categorias</a>
         </li>
+        {% endif %}
+{% if pode('catalogo') %}
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.blueprint == 'produtos' }}"
              href="{{ url_for('produtos.lista') }}">Produtos</a>
         </li>
+        {% endif %}
+{% if pode('catalogo') %}
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.blueprint == 'estoque' }}"
              href="{{ url_for('estoque.lista') }}">Estoque</a>
         </li>
+        {% endif %}
+{% if pode('comprar') %}
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.blueprint == 'fornecedores' }}"
              href="{{ url_for('fornecedores.lista') }}">Fornecedores</a>
         </li>
+        {% endif %}
+{% if pode('comprar') %}
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.blueprint == 'compras' }}"
              href="{{ url_for('compras.lista') }}">Compras</a>
         </li>
+        {% endif %}
+{% if pode('financeiro') %}
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.blueprint == 'financeiro' and request.endpoint != 'financeiro.resumo' }}"
              href="{{ url_for('financeiro.lista') }}">Financeiro</a>
         </li>
+        {% endif %}
+{% if pode('financeiro') %}
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.endpoint == 'financeiro.resumo' }}"
              href="{{ url_for('financeiro.resumo') }}">Resumo mensal</a>
         </li>
+        {% endif %}
+{% if pode('relatorios') %}
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.blueprint == 'relatorios' }}"
              href="{{ url_for('relatorios.indice') }}">Relatórios</a>
         </li>
+        {% endif %}
+        {% if pode('usuarios') %}
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'usuarios' }}"
+             href="{{ url_for('usuarios.lista') }}">Usuários</a>
+        </li>
+        {% endif %}
       </ul>
     </aside>
 

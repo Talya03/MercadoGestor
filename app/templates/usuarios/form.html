@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% set titulo = 'Editar usuário' if editando else 'Novo usuário' %}
+{% block title %}{{ titulo }} · MercadoGestor{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">{{ titulo }}</h1>
+<div class="card" style="max-width: 560px;"><div class="card-body">
+  <form method="post" autocomplete="off">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mb-3">
+      <label class="form-label" for="nome">Nome</label>
+      <input type="text" class="form-control" id="nome" name="nome" maxlength="80" value="{{ valores.get('nome', '') }}" autofocus required>
+    </div>
+    {% if not editando %}
+    <div class="mb-3">
+      <label class="form-label" for="login">Login</label>
+      <input type="text" class="form-control" id="login" name="login" maxlength="30" autocapitalize="none" value="{{ valores.get('login', '') }}" required>
+      <div class="form-text">Letras minúsculas, números, ponto, hífen ou sublinhado.</div>
+    </div>
+    {% else %}
+    <p class="text-muted">Login: <strong>{{ editando.login }}</strong> (não pode ser alterado)</p>
+    {% endif %}
+    <div class="mb-3">
+      <label class="form-label" for="perfil">Perfil</label>
+      <select class="form-select" id="perfil" name="perfil" {{ 'disabled' if editando and editando.id == usuario_atual.id }}>
+        {% for chave, nome in perfis.items() %}
+        <option value="{{ chave }}" {{ 'selected' if valores.get('perfil', 'CAIXA') == chave }}>{{ nome }}</option>{% endfor %}
+      </select>
+      {% if editando and editando.id == usuario_atual.id %}
+      <input type="hidden" name="perfil" value="{{ editando.perfil }}">
+      <div class="form-text">Você não pode mudar o seu próprio perfil.</div>{% endif %}
+    </div>
+    {% if not editando %}
+    <div class="mb-3">
+      <label class="form-label" for="senha">Senha temporária (opcional)</label>
+      <input type="text" class="form-control" id="senha" name="senha" autocomplete="off">
+      <div class="form-text">Deixe em branco para o sistema gerar uma. A pessoa troca no primeiro acesso.</div>
+    </div>
+    {% endif %}
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-success">Salvar</button>
+      <a href="{{ url_for('usuarios.lista') }}" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+  </form>
+</div></div>
+{% endblock %}

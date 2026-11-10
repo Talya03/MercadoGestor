@@ -23,14 +23,16 @@
   {{ cartao('Ontem', p.vendas_ontem_total|moeda) }}
   {{ cartao('Estoque baixo', p.estoque_baixo_total ~ ' produto' ~ ('s' if p.estoque_baixo_total != 1 else ''),
             'Saldo no mínimo ou abaixo', perigo=p.estoque_baixo_total > 0) }}
+  {% if pode('financeiro') %}
   {{ cartao('Contas vencidas', p.contas_vencido|moeda, 'A pagar no total: ' ~ (p.contas_pendente|moeda), perigo=p.contas_vencido > 0) }}
+  {% endif %}
 </div>
 
 <div class="row g-3">
   <div class="col-lg-6">
     <div class="card h-100">
       <div class="card-header d-flex justify-content-between"><span>Estoque baixo</span>
-        <a href="{{ url_for('estoque.lista', baixo=1) }}" class="small">Ver todos</a></div>
+        {% if pode('catalogo') %}<a href="{{ url_for('estoque.lista', baixo=1) }}" class="small">Ver todos</a>{% endif %}</div>
       <ul class="list-group list-group-flush">
         {% for pr in p.estoque_baixo %}
         <li class="list-group-item d-flex justify-content-between">
@@ -44,6 +46,7 @@
       </ul>
     </div>
   </div>
+  {% if pode('financeiro') %}
   <div class="col-lg-6">
     <div class="card h-100">
       <div class="card-header d-flex justify-content-between"><span>Contas a vencer (7 dias)</span>
@@ -61,6 +64,8 @@
       </ul>
     </div>
   </div>
+  {% endif %}
+  {% if pode('financeiro') %}
   <div class="col-12">
     <div class="card">
       <div class="card-header d-flex justify-content-between"><span>Mês atual</span>
@@ -73,5 +78,6 @@
       </div>
     </div>
   </div>
+  {% endif %}
 </div>
 {% endblock %}
