@@ -13,13 +13,13 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 # Valor de desenvolvimento. Se ele ainda estiver em uso fora dos testes, o sistema gera uma
-# chave aleatória própria e a guarda em instance/secret_key (veja create_app).
+# chave aleatória própria e a guarda em instance/secret_key (veja create_app)
 CHAVE_DEV = "dev-chave-apenas-para-desenvolvimento"
 
 
 class Config:
     # Em desenvolvimento usamos um valor padrão. Em uso real, defina a
-    # variável de ambiente SECRET_KEY com um valor longo e aleatório.
+    # variável de ambiente SECRET_KEY com um valor longo e aleatório
     SECRET_KEY = os.environ.get("SECRET_KEY", CHAVE_DEV)
 
     # SQLite: um único arquivo dentro da pasta instance/.
@@ -33,8 +33,8 @@ class Config:
     BACKUP_DIR = os.environ.get("BACKUP_DIR")
     BACKUP_MANTER = int(os.environ.get("BACKUP_MANTER", "14"))
 
-    # Desconto máximo (em % do total da venda) que o caixa pode dar.
-    # Quando existirem perfis de usuário (Fase 8), o administrador poderá ter outro limite.
+    # Desconto máximo (em % do total da venda) que o caixa pode dar
+    # Quando existirem perfis de usuário (Fase 8), o administrador poderá ter outro limite
     DESCONTO_MAXIMO_PERCENTUAL = Decimal(os.environ.get("DESCONTO_MAXIMO_PERCENTUAL", "10"))
 
     # --- Segurança de acesso (Fase 8) ---
@@ -46,7 +46,7 @@ class Config:
     LOGIN_MAX_TENTATIVAS = 5  # erros seguidos até bloquear a conta
     LOGIN_BLOQUEIO_MINUTOS = 5
     SENHA_TAMANHO_MIN = 8
-    # scrypt é o padrão atual do Werkzeug; se o Python não o tiver, cai para PBKDF2.
+    # scrypt é o padrão atual do Werkzeug; se o Python não o tiver, cai para PBKDF2
     PASSWORD_HASH_METHOD = "scrypt" if hasattr(hashlib, "scrypt") else "pbkdf2:sha256:600000"
 
 

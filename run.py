@@ -1,4 +1,4 @@
-"""Ponto de entrada: executa o servidor de desenvolvimento.
+"""Ponto de entrada: executa o servidor de desenvolvimento
 
 Uso:  python run.py   ->  http://127.0.0.1:5000
 """
