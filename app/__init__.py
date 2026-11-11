@@ -53,10 +53,11 @@ def create_app(config_class=Config, instance_path=None):
     from app.routes.fornecedores import fornecedores_bp
     from app.routes.main import main_bp
     from app.routes.pdv import pdv_bp
+    from app.routes.precificacao import precificacao_bp
     from app.routes.produtos import produtos_bp
     from app.routes.relatorios import relatorios_bp
     from app.routes.usuarios import usuarios_bp
-    from app.utils.formatacao import data_hora, moeda, quantidade, quantidade_com_sinal
+    from app.utils.formatacao import data_hora, moeda, percentual, quantidade, quantidade_com_sinal
 
     # O porteiro (before_request) é registrado DEPOIS do CSRF: o CSRF é conferido primeiro.
     seguranca.registrar(app)
@@ -66,6 +67,7 @@ def create_app(config_class=Config, instance_path=None):
     app.register_blueprint(categorias_bp)
     app.register_blueprint(produtos_bp)
     app.register_blueprint(estoque_bp)
+    app.register_blueprint(precificacao_bp)
     app.register_blueprint(pdv_bp)
     app.register_blueprint(fornecedores_bp)
     app.register_blueprint(compras_bp)
@@ -77,6 +79,7 @@ def create_app(config_class=Config, instance_path=None):
     # Filtros usados nos templates: {{ preco|moeda }}, {{ saldo|quantidade }}
     app.add_template_filter(moeda, "moeda")
     app.add_template_filter(quantidade, "quantidade")
+    app.add_template_filter(percentual, "percentual")
     app.add_template_filter(quantidade_com_sinal, "quantidade_com_sinal")
     app.add_template_filter(data_hora, "data_hora")
 

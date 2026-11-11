@@ -21,6 +21,7 @@ PERMISSAO_DO_MODULO = {
     "produtos": "catalogo",
     "categorias": "catalogo",
     "estoque": "catalogo",
+    "precificacao": "catalogo",
     "fornecedores": "comprar",
     "compras": "comprar",
     "relatorios": "relatorios",

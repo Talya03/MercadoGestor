@@ -14,6 +14,13 @@ def moeda(valor):
     return f"R$ {texto}"
 
 
+def percentual(valor):
+    """30 -> '30,00%'    None -> '—'"""
+    if valor is None:
+        return "—"
+    return f"{Decimal(valor).quantize(Decimal('0.01')):.2f}".replace(".", ",") + "%"
+
+
 def quantidade(valor):
     """12.350 -> '12,35'    5.000 -> '5'    0 -> '0'"""
     if valor is None:

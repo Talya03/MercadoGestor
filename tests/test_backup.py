@@ -51,7 +51,8 @@ def test_backup_cria_copia_fiel_verificada_e_privada(app_arquivo):
     nome = svc.criar_backup()
     caminho = svc.caminho_do_backup(nome)
     assert _nomes_de_produto(caminho) == ["Feijão 1kg"]
-    assert stat.S_IMODE(os.stat(caminho).st_mode) == 0o600
+    if os.name == "posix":  # permissões estilo Unix não existem no Windows
+        assert stat.S_IMODE(os.stat(caminho).st_mode) == 0o600
     assert not [n for n in os.listdir(svc.pasta_de_backups()) if n.endswith(".tmp")]
 
 

@@ -58,6 +58,12 @@
              href="{{ url_for('estoque.lista') }}">Estoque</a>
         </li>
         {% endif %}
+{% if pode('catalogo') %}
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'precificacao' }}"
+             href="{{ url_for('precificacao.lista') }}">Precificação</a>
+        </li>
+        {% endif %}
 {% if pode('comprar') %}
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.blueprint == 'fornecedores' }}"

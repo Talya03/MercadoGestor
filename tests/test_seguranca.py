@@ -100,7 +100,7 @@ def test_url_inexistente_continua_404(client, client_anonimo):
 # ======================================================== matriz de permissões
 PAGINAS = {
     "pdv": ["/pdv/", "/pdv/vendas"],
-    "catalogo": ["/produtos/", "/categorias/", "/estoque/"],
+    "catalogo": ["/produtos/", "/categorias/", "/estoque/", "/precificacao/"],
     "comprar": ["/fornecedores/", "/compras/", "/compras/nova"],
     "relatorios": ["/relatorios/", "/relatorios/produtos", "/relatorios/dias?formato=csv"],
     "financeiro": ["/financeiro/", "/financeiro/resumo", "/financeiro/novo"],
@@ -184,10 +184,10 @@ def test_inicio_esconde_blocos_financeiros_de_quem_nao_pode(cliente_como):
 def test_menu_so_mostra_o_que_o_perfil_abre(cliente_como):
     esperado = {
         "CAIXA": {"PDV (caixa)", "Vendas"},
-        "GERENTE": {"PDV (caixa)", "Vendas", "Categorias", "Produtos", "Estoque", "Fornecedores", "Compras", "Relatórios"},
+        "GERENTE": {"PDV (caixa)", "Vendas", "Categorias", "Produtos", "Estoque", "Fornecedores", "Compras", "Relatórios", "Precificação"},
     }
     todos = {"PDV (caixa)", "Vendas", "Categorias", "Produtos", "Estoque", "Fornecedores", "Compras",
-             "Financeiro", "Resumo mensal", "Relatórios", "Usuários", "Backup"}
+             "Financeiro", "Resumo mensal", "Relatórios", "Usuários", "Backup", "Precificação"}
     for perfil, visivel in esperado.items():
         menu = re.findall(r'class="nav-link[^"]*"\s+href="[^"]+">([^<]+)</a>', html(cliente_como(perfil).get("/")))
         assert set(menu) - {"Início"} == visivel, perfil
