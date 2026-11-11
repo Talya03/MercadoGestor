@@ -142,7 +142,7 @@ def test_acao_negada_nao_executa(cliente_como):
     """403 não pode ter efeito colateral: a rota nem chega a ser executada."""
     caixa = cliente_como("CAIXA")
     r = caixa.post("/financeiro/novo", data={"tipo": "DESPESA", "categoria": "ALUGUEL", "descricao": "x",
-                                             "valor": "10", "data": "2026-11-10"})
+                                                "valor": "10", "data": "2026-11-10"})
     assert r.status_code == 403 and db.session.query(Lancamento).count() == 0
     r = caixa.post("/produtos/novo", data={"nome": "Leite"})
     assert r.status_code == 403 and db.session.query(Produto).count() == 0
@@ -187,7 +187,7 @@ def test_menu_so_mostra_o_que_o_perfil_abre(cliente_como):
         "GERENTE": {"PDV (caixa)", "Vendas", "Categorias", "Produtos", "Estoque", "Fornecedores", "Compras", "Relatórios", "Precificação"},
     }
     todos = {"PDV (caixa)", "Vendas", "Categorias", "Produtos", "Estoque", "Fornecedores", "Compras",
-             "Financeiro", "Resumo mensal", "Relatórios", "Usuários", "Backup", "Precificação"}
+                "Financeiro", "Resumo mensal", "Relatórios", "Usuários", "Backup", "Precificação"}
     for perfil, visivel in esperado.items():
         menu = re.findall(r'class="nav-link[^"]*"\s+href="[^"]+">([^<]+)</a>', html(cliente_como(perfil).get("/")))
         assert set(menu) - {"Início"} == visivel, perfil

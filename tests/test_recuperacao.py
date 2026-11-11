@@ -15,7 +15,7 @@ from app import create_app, migracoes
 from app.extensions import db
 from app.models import Lancamento, Produto, Usuario, Venda
 from app.services import (backup_service, categoria_service, estoque_service, financeiro_service,
-                          produto_service, usuario_service, venda_service)
+                            produto_service, usuario_service, venda_service)
 from config import TestConfig
 
 SENHA = "senha-segura-123"
@@ -50,7 +50,7 @@ def _popular():
     usuario_service.criar_primeiro_dono("Dona Talya", "talya", SENHA)
     cat = categoria_service.criar("Mercearia")
     p = produto_service.criar({"categoria_id": cat.id, "nome": "Arroz 5kg", "codigo": "A1", "unidade_medida": "UN",
-                               "preco_custo": "20", "preco_venda": "29,90", "estoque_minimo": "2"})
+                                "preco_custo": "20", "preco_venda": "29,90", "estoque_minimo": "2"})
     estoque_service.entrada(p.id, "10", "Inicial")
     venda_service.finalizar({p.id: Decimal("3")}, None, "PIX")
     financeiro_service.criar("DESPESA", "ALUGUEL", "Aluguel", "1800", date(2026, 11, 10))

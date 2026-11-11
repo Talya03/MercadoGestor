@@ -76,3 +76,4 @@ def cliente_como(app):
         entrar(cliente, perfil, login=f"{perfil.lower()}-teste")
         return cliente
     return criar
+
