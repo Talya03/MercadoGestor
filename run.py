@@ -16,4 +16,8 @@ with app.app_context():
     migracoes.aplicar()
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    # debug=True liga o depurador interativo do Werkzeug, que PERMITE EXECUTAR CÓDIGO no computador
+    # a quem abrir a página de erro. Por isso vem DESLIGADO. Para desenvolver (recarga automática ao salvar):
+    #   Windows (Git Bash):  MERCADOGESTOR_DEBUG=1 python run.py
+    # O sistema escuta só em 127.0.0.1 (este computador); não o exponha à rede.
+    app.run(host="127.0.0.1", port=5000, debug=os.environ.get("MERCADOGESTOR_DEBUG") == "1")

@@ -6,10 +6,12 @@ Funciona como um porteiro que olha TODA requisição antes da rota (before_reque
 from urllib.parse import urlsplit
 
 from flask import abort, g, redirect, render_template, request, session, url_for
+from flask_wtf.csrf import CSRFError
 
 from app.permissoes import (
     ENDPOINTS_PUBLICOS, ENDPOINTS_SO_LOGADO, PERMISSAO_DO_MODULO, perfil_pode,
 )
+from app.extensions import db
 from app.services import usuario_service
 
 
@@ -79,6 +81,10 @@ def guarda():
     return None
 
 
+CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
+       "font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'")
+
+
 def cabecalhos_de_seguranca(resposta):
     """Páginas do sistema não ficam em cache (o botão "voltar" não reabre tela após o logout)."""
     if request.endpoint != "static":
@@ -87,6 +93,9 @@ def cabecalhos_de_seguranca(resposta):
     resposta.headers.setdefault("X-Content-Type-Options", "nosniff")
     resposta.headers.setdefault("X-Frame-Options", "DENY")  # ninguém coloca o sistema dentro de um iframe
     resposta.headers.setdefault("Referrer-Policy", "same-origin")
+    # CSP: o navegador só executa JavaScript e carrega recursos do próprio sistema. Se alguém conseguir
+    # injetar um <script> numa tela (XSS), ele é bloqueado. 'unsafe-inline' só em estilos (style="...").
+    resposta.headers.setdefault("Content-Security-Policy", CSP)
     return resposta
 
 
@@ -102,8 +111,32 @@ def pagina_403(_erro):
     return render_template("erros/403.html"), 403
 
 
+def _pagina_de_erro(status, titulo, mensagem):
+    return render_template("erros/erro.html", status=status, titulo=titulo, mensagem=mensagem), status
+
+
+def pagina_400_csrf(_erro):
+    """Token de segurança do formulário ausente/vencido (ex.: a tela ficou aberta além do tempo da sessão)."""
+    return _pagina_de_erro(400, "A página expirou",
+                           "Por segurança, o formulário só vale por um tempo. Volte, recarregue a página e tente de novo.")
+
+
+def pagina_404(_erro):
+    return _pagina_de_erro(404, "Página não encontrada", "O endereço não existe ou foi digitado errado.")
+
+
+def pagina_500(_erro):
+    db.session.rollback()  # não deixa uma transação quebrada pendurada
+    return _pagina_de_erro(500, "Algo deu errado",
+                           "O sistema encontrou um problema inesperado. Nada foi perdido do que já estava salvo. "
+                           "Tente de novo; se persistir, avise quem cuida do sistema.")
+
+
 def registrar(app):
     app.before_request(guarda)
     app.after_request(cabecalhos_de_seguranca)
     app.context_processor(contexto_dos_templates)
     app.register_error_handler(403, pagina_403)
+    app.register_error_handler(CSRFError, pagina_400_csrf)
+    app.register_error_handler(404, pagina_404)
+    app.register_error_handler(500, pagina_500)

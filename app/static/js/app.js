@@ -8,3 +8,11 @@ document.addEventListener("submit", function (evento) {
     evento.preventDefault();
   }
 });
+
+// Botão "Imprimir": <button data-imprimir>. Fica aqui (e não em onclick="...") porque a política de
+// segurança do sistema (CSP) não permite JavaScript escrito dentro do HTML.
+document.addEventListener("click", function (evento) {
+  if (evento.target.closest("[data-imprimir]")) {
+    window.print();
+  }
+});

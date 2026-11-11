@@ -1,0 +1,5 @@
+Bootstrap 5.3.3 (MIT) — arquivos oficiais do pacote npm "bootstrap@5.3.3", sem alterações.
+SHA-384 (iguais aos publicados na documentação do Bootstrap):
+  bootstrap.min.css        sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH
+  bootstrap.bundle.min.js  sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz
+Estão aqui para o sistema funcionar SEM internet e sem depender de um servidor de terceiros.

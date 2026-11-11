@@ -62,14 +62,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-  (function () {
-    const marca = document.getElementById("ja_pago");
-    const grupo = document.getElementById("grupo-pagamento");
-    if (!marca || !grupo) return;
-    function atualizar() { grupo.style.display = marca.checked ? "" : "none"; }
-    marca.addEventListener("change", atualizar);
-    atualizar();
-  })();
-</script>
+<script src="{{ url_for('static', filename='js/financeiro_form.js') }}"></script>
 {% endblock %}

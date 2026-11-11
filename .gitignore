@@ -3,7 +3,9 @@ venv/
 __pycache__/
 *.pyc
 .pytest_cache/
-instance/*.db
+# Tudo dentro de instance/ é DADO PRIVADO: banco, cópias de segurança (.antes-da-migracao-*, backups/),
+# e a chave secreta (secret_key). Nunca vão para o Git.
+instance/
 .env
 .vscode/
 .idea/

@@ -6,15 +6,16 @@ O banco atual NÃO é apagado: vira instance/mercadogestor.db.antes-da-restaurac
 import sys
 
 from app import create_app
+from config import Config
 from app.services import backup_service
 from app.utils.erros import ErroDeNegocio
 
 
-def main(argumentos):
+def main(argumentos, config_class=Config):
     if len(argumentos) != 1:
         print(__doc__)
         return 2
-    app = create_app()
+    app = create_app(config_class)
     caminho_banco = app.config["SQLALCHEMY_DATABASE_URI"].replace("sqlite:///", "", 1)
     try:
         seguranca = backup_service.restaurar(argumentos[0], caminho_banco)
