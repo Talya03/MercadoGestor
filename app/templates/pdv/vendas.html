@@ -32,6 +32,7 @@
           <th>Venda</th>
           <th>Data e hora</th>
           <th>Pagamento</th>
+          <th>Operador</th>
           <th class="text-end">Desconto</th>
           <th class="text-end">Total</th>
         </tr>
@@ -42,19 +43,20 @@
           <td><a href="{{ url_for('pdv.comprovante', venda_id=v.id) }}">#{{ v.id }}</a></td>
           <td class="text-nowrap">{{ v.data_hora|data_hora }}</td>
           <td>{% for p in v.pagamentos %}{{ p.forma_nome }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+          <td class="text-muted">{{ v.usuario.nome if v.usuario else '—' }}</td>
           <td class="text-end text-muted">{{ v.desconto|moeda if v.desconto > 0 else '—' }}</td>
           <td class="text-end fw-semibold">{{ v.total|moeda }}</td>
         </tr>
         {% else %}
         <tr>
-          <td colspan="5" class="text-center text-muted py-4">Nenhuma venda neste período.</td>
+          <td colspan="6" class="text-center text-muted py-4">Nenhuma venda neste período.</td>
         </tr>
         {% endfor %}
       </tbody>
       {% if vendas %}
       <tfoot class="table-light">
         <tr>
-          <th colspan="4">{{ vendas|length }} venda{{ 's' if vendas|length != 1 }} no período</th>
+          <th colspan="5">{{ vendas|length }} venda{{ 's' if vendas|length != 1 }} no período</th>
           <th class="text-end">{{ total_periodo|moeda }}</th>
         </tr>
       </tfoot>

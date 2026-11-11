@@ -1,7 +1,7 @@
 """Rotas do Controle de Estoque."""
 from datetime import date
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import abort, Blueprint, flash, g, redirect, render_template, request, url_for
 from wtforms.fields import SelectChoice
 
 from app.forms.estoque_form import MovimentacaoForm
@@ -94,8 +94,10 @@ def movimentar(operacao):
 
     if form.validate_on_submit():
         try:
+            # RN67: o autor vem da sessão (g.usuario), NUNCA de um campo do formulário.
             movimentacao = config["servico"](
-                form.produto_id.data, form.quantidade.data, form.motivo.data
+                form.produto_id.data, form.quantidade.data, form.motivo.data,
+                usuario_id=g.usuario.id,
             )
         except ErroDeNegocio as erro:
             flash(str(erro), "danger")

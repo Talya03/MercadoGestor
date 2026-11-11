@@ -7,7 +7,7 @@ item (produto, quantidade, custo). As linhas chegam como listas paralelas
 import uuid
 from datetime import date
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 
 from app.services import compra_service, fornecedor_service, produto_service
 from app.utils.erros import ErroDeNegocio
@@ -107,7 +107,8 @@ def nova():
     vencimento = request.form.get("vencimento", "")
     try:
         compra = compra_service.registrar(
-            fornecedor_id, itens, documento, observacao, token, condicao, vencimento
+            fornecedor_id, itens, documento, observacao, token, condicao, vencimento,
+            usuario_id=g.usuario.id,  # RN67
         )
     except ErroDeNegocio as erro:
         flash(str(erro), "danger")

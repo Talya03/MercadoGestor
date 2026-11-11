@@ -28,6 +28,9 @@ class Compra(db.Model):
     # Token de envio (idempotência), igual ao da venda: o mesmo formulário
     # enviado duas vezes não registra a compra (nem dá entrada no estoque) duas vezes.
     token_envio = db.Column(db.String(36), unique=True)
+    # Quem registrou (auditoria, RN67). Vazio nos registros anteriores à v0.12.
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"))
+    usuario = db.relationship("Usuario")
 
     fornecedor = db.relationship("Fornecedor", back_populates="compras")
     itens = db.relationship("ItemCompra", back_populates="compra", order_by="ItemCompra.id")

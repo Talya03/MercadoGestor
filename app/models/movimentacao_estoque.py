@@ -35,6 +35,9 @@ class MovimentacaoEstoque(db.Model):
     data_hora = db.Column(db.DateTime, nullable=False, default=_agora)
 
     produto = db.relationship("Produto", back_populates="movimentacoes")
+    # Quem registrou (auditoria, RN67). Vazio nos registros anteriores à v0.12.
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"))
+    usuario = db.relationship("Usuario")
 
     @property
     def variacao(self):

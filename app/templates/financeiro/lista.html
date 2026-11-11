@@ -52,7 +52,7 @@
   <div class="table-responsive">
     <table class="table table-hover align-middle mb-0">
       <thead class="table-light">
-        <tr><th>Vencimento</th><th>Descrição</th><th>Categoria</th><th class="text-end">Valor</th><th>Situação</th><th class="text-end">Ações</th></tr>
+        <tr><th>Vencimento</th><th>Descrição</th><th>Categoria</th><th>Lançado por</th><th class="text-end">Valor</th><th>Situação</th><th class="text-end">Ações</th></tr>
       </thead>
       <tbody>
         {% for l in lancamentos %}
@@ -63,6 +63,7 @@
             {% if l.compra_id %}<a class="small" href="{{ url_for('compras.detalhe', compra_id=l.compra_id) }}">(compra)</a>{% endif %}
           </td>
           <td class="text-muted">{{ l.categoria_nome }}</td>
+          <td class="text-muted">{{ l.usuario.nome if l.usuario else '—' }}</td>
           <td class="text-end fw-semibold {{ 'text-success' if l.tipo == 'RECEITA' }}">
             {{ '+' if l.tipo == 'RECEITA' else '−' }}{{ l.valor|moeda }}
           </td>
@@ -102,7 +103,7 @@
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="6" class="text-center text-muted py-4">Nada por aqui neste filtro.</td></tr>
+        <tr><td colspan="7" class="text-center text-muted py-4">Nada por aqui neste filtro.</td></tr>
         {% endfor %}
       </tbody>
     </table>

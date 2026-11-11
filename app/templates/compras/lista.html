@@ -42,6 +42,7 @@
           <th>Data e hora</th>
           <th>Fornecedor</th>
           <th>Nota</th>
+          <th>Registrada por</th>
           <th class="text-end">Total</th>
         </tr>
       </thead>
@@ -52,16 +53,17 @@
           <td class="text-nowrap">{{ c.data_hora|data_hora }}</td>
           <td>{{ c.fornecedor.nome }}</td>
           <td class="text-muted">{{ c.numero_documento or "—" }}</td>
+          <td class="text-muted">{{ c.usuario.nome if c.usuario else "—" }}</td>
           <td class="text-end fw-semibold">{{ c.total|moeda }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="5" class="text-center text-muted py-4">Nenhuma compra encontrada.</td></tr>
+        <tr><td colspan="6" class="text-center text-muted py-4">Nenhuma compra encontrada.</td></tr>
         {% endfor %}
       </tbody>
       {% if compras %}
       <tfoot class="table-light">
         <tr>
-          <th colspan="4">{{ compras|length }} compra{{ 's' if compras|length != 1 }}</th>
+          <th colspan="5">{{ compras|length }} compra{{ 's' if compras|length != 1 }}</th>
           <th class="text-end">{{ total_periodo|moeda }}</th>
         </tr>
       </tfoot>

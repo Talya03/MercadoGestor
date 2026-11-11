@@ -12,6 +12,7 @@
     <dl class="row mb-0">
       <dt class="col-sm-3">Fornecedor</dt><dd class="col-sm-9">{{ compra.fornecedor.nome }}</dd>
       <dt class="col-sm-3">Data e hora</dt><dd class="col-sm-9">{{ compra.data_hora|data_hora }}</dd>
+      <dt class="col-sm-3">Registrada por</dt><dd class="col-sm-9">{{ compra.usuario.nome if compra.usuario else "—" }}</dd>
       <dt class="col-sm-3">Nº da nota</dt><dd class="col-sm-9">{{ compra.numero_documento or "—" }}</dd>
       <dt class="col-sm-3">Pagamento</dt>
       <dd class="col-sm-9">

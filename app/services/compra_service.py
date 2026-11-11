@@ -91,7 +91,7 @@ def _validar_item(bruto, numero):
 
 
 def registrar(fornecedor_id, itens, numero_documento=None, observacao=None, token_envio=None,
-              condicao="A_VISTA", vencimento=None):
+              condicao="A_VISTA", vencimento=None, usuario_id=None):
     """Registra a compra inteira de forma atômica (RN33 a RN38). Devolve a Compra.
 
     `itens`: lista de dicts com 'produto_id', 'quantidade' e 'custo_unitario'
@@ -146,6 +146,7 @@ def registrar(fornecedor_id, itens, numero_documento=None, observacao=None, toke
             observacao=observacao,
             total=total,
             token_envio=token_envio or None,
+            usuario_id=usuario_id,  # RN67
         )
         db.session.add(compra)
         db.session.flush()  # gera o número da compra para usar no motivo da entrada
@@ -162,7 +163,8 @@ def registrar(fornecedor_id, itens, numero_documento=None, observacao=None, toke
             )
             try:
                 estoque_service.entrada(
-                    produto.id, quantidade, f"Compra #{compra.id}", confirmar=False
+                    produto.id, quantidade, f"Compra #{compra.id}", confirmar=False,
+                    usuario_id=usuario_id,
                 )
             except ErroDeNegocio as erro:
                 raise ErroDeNegocio(f"{produto.nome}: {erro}")
@@ -177,6 +179,7 @@ def registrar(fornecedor_id, itens, numero_documento=None, observacao=None, toke
                 vencimento=vencimento,
                 pago_em=hoje if condicao == "A_VISTA" else None,
                 compra_id=compra.id,
+                usuario_id=usuario_id,
             )
         )
         db.session.commit()  # único commit: tudo vale junto (RN36)
@@ -205,7 +208,11 @@ def compra_por_token(token):
 def buscar(compra_id):
     consulta = (
         select(Compra)
-        .options(joinedload(Compra.fornecedor), joinedload(Compra.itens).joinedload(ItemCompra.produto))
+        .options(
+            joinedload(Compra.fornecedor), joinedload(Compra.usuario),
+            joinedload(Compra.itens).joinedload(ItemCompra.produto),
+            joinedload(Compra.lancamento),
+        )
         .where(Compra.id == compra_id)
     )
     compra = db.session.execute(consulta).unique().scalar_one_or_none()
@@ -220,7 +227,7 @@ def listar(data_inicio=None, data_fim=None, fornecedor_id=None, limite=LIMITE_LI
         raise ErroDeNegocio("A data inicial não pode ser posterior à data final.")
     consulta = (
         select(Compra)
-        .options(joinedload(Compra.fornecedor))
+        .options(joinedload(Compra.fornecedor), joinedload(Compra.usuario))
         .order_by(Compra.data_hora.desc(), Compra.id.desc())
         .limit(limite)
     )

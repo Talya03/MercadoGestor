@@ -46,6 +46,9 @@ class Venda(db.Model):
     # lenta), a segunda tentativa bate na restrição UNIQUE e é recusada,
     # em vez de vender e baixar o estoque duas vezes.
     token_envio = db.Column(db.String(36), unique=True)
+    # Quem registrou (auditoria, RN67). Vazio nos registros anteriores à v0.12.
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"))
+    usuario = db.relationship("Usuario")
 
     itens = db.relationship("ItemVenda", back_populates="venda", order_by="ItemVenda.id")
     pagamentos = db.relationship("Pagamento", back_populates="venda", order_by="Pagamento.id")

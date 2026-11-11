@@ -71,7 +71,7 @@ def _validar_quantidade(valor, produto, rotulo, permitir_zero=False):
 
 
 # ------------------------------------------------------------------ gravação
-def _registrar(produto, tipo, quantidade, novo_saldo, motivo, confirmar=True):
+def _registrar(produto, tipo, quantidade, novo_saldo, motivo, confirmar=True, usuario_id=None):
     """Grava movimentação + novo saldo de forma atômica e consistente (RN05, RN17).
 
     confirmar=False é usado pela VENDA: a baixa de estoque entra na transação
@@ -113,6 +113,7 @@ def _registrar(produto, tipo, quantidade, novo_saldo, motivo, confirmar=True):
         saldo_anterior=saldo_lido,
         saldo_posterior=novo_saldo,
         motivo=motivo,
+        usuario_id=usuario_id,  # RN67: quem fez a movimentação
     )
     db.session.add(movimentacao)
     try:
@@ -133,7 +134,7 @@ def _checar_limite(novo_saldo):
         raise ErroDeNegocio("O saldo resultante passaria do limite que o sistema comporta.")
 
 
-def entrada(produto_id, quantidade, motivo, confirmar=True):
+def entrada(produto_id, quantidade, motivo, confirmar=True, usuario_id=None):
     """Chegada de mercadoria: aumenta o saldo.
 
     confirmar=False: não faz commit (veja _registrar); usado no registro da COMPRA.
@@ -143,7 +144,7 @@ def entrada(produto_id, quantidade, motivo, confirmar=True):
     motivo = _validar_motivo(motivo)
     novo_saldo = produto.quantidade_estoque + quantidade
     _checar_limite(novo_saldo)
-    return _registrar(produto, "ENTRADA", quantidade, novo_saldo, motivo, confirmar)
+    return _registrar(produto, "ENTRADA", quantidade, novo_saldo, motivo, confirmar, usuario_id)
 
 
 def validar_quantidade(valor, produto, rotulo="Quantidade", permitir_zero=False):
@@ -151,7 +152,7 @@ def validar_quantidade(valor, produto, rotulo="Quantidade", permitir_zero=False)
     return _validar_quantidade(valor, produto, rotulo, permitir_zero)
 
 
-def saida(produto_id, quantidade, motivo, confirmar=True):
+def saida(produto_id, quantidade, motivo, confirmar=True, usuario_id=None):
     """Saída por perda, vencimento, consumo, venda etc.: diminui o saldo (RN04, RN06).
 
     confirmar=False: não faz commit (veja _registrar); usado na finalização da venda.
@@ -165,10 +166,10 @@ def saida(produto_id, quantidade, motivo, confirmar=True):
             f"Saldo insuficiente: há {formatar_quantidade(saldo)} {produto.unidade_medida} "
             f"em estoque e a saída pedida é de {formatar_quantidade(quantidade)}."
         )
-    return _registrar(produto, "SAIDA", quantidade, saldo - quantidade, motivo, confirmar)
+    return _registrar(produto, "SAIDA", quantidade, saldo - quantidade, motivo, confirmar, usuario_id)
 
 
-def ajuste(produto_id, saldo_contado, motivo):
+def ajuste(produto_id, saldo_contado, motivo, usuario_id=None):
     """Corrige o saldo para o valor realmente contado nas prateleiras.
 
     A pessoa informa QUANTO EXISTE (saldo contado), e o sistema calcula a
@@ -181,7 +182,7 @@ def ajuste(produto_id, saldo_contado, motivo):
     diferenca = novo_saldo - produto.quantidade_estoque
     if diferenca == 0:  # RN16
         raise ErroDeNegocio("O saldo informado é igual ao saldo atual. Não há o que ajustar.")
-    return _registrar(produto, "AJUSTE", abs(diferenca), novo_saldo, motivo)
+    return _registrar(produto, "AJUSTE", abs(diferenca), novo_saldo, motivo, usuario_id=usuario_id)
 
 
 # ----------------------------------------------------------------- consultas
@@ -197,7 +198,7 @@ def historico(produto_id=None, tipo=None, data_inicio=None, data_fim=None, limit
 
     consulta = (
         select(MovimentacaoEstoque)
-        .options(joinedload(MovimentacaoEstoque.produto))
+        .options(joinedload(MovimentacaoEstoque.produto), joinedload(MovimentacaoEstoque.usuario))
         .order_by(desc(MovimentacaoEstoque.data_hora), desc(MovimentacaoEstoque.id))
         .limit(limite)
     )

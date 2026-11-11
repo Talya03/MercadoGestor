@@ -90,7 +90,8 @@ def test_pagar_com_data_e_validacoes(app):
         fin.pagar(l.id, hoje_local() + timedelta(days=1))
     with pytest.raises(ErroDeNegocio, match="data válida"):
         fin.pagar(l.id, "lixo")
-    assert fin.pagar(l.id, "2026-11-03").pago_em == date(2026, 11, 3)
+    ontem = hoje_local() - timedelta(days=1)  # relativo a hoje: não quebra com o passar do tempo
+    assert fin.pagar(l.id, ontem.isoformat()).pago_em == ontem
 
 
 def test_receita_nao_paga_nem_desfaz(app):

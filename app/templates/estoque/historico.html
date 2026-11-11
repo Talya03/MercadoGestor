@@ -56,6 +56,7 @@
           <th class="text-end">Variação</th>
           <th class="text-end">Saldo</th>
           <th>Motivo</th>
+          <th>Por</th>
         </tr>
       </thead>
       <tbody>
@@ -75,10 +76,11 @@
             {{ m.saldo_anterior|quantidade }} → {{ m.saldo_posterior|quantidade }}
           </td>
           <td>{{ m.motivo }}</td>
+          <td class="text-muted">{{ m.usuario.nome if m.usuario else '—' }}</td>
         </tr>
         {% else %}
         <tr>
-          <td colspan="6" class="text-center text-muted py-4">
+          <td colspan="7" class="text-center text-muted py-4">
             Nenhuma movimentação encontrada com esses filtros.
           </td>
         </tr>

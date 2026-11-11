@@ -2,7 +2,7 @@
 import re
 from datetime import date
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 
 from app.models import TIPOS_LANCAMENTO
 from app.models.lancamento import CATEGORIAS, CATEGORIAS_DESPESA, CATEGORIAS_RECEITA
@@ -70,6 +70,7 @@ def novo():
                 tipo, valores.get("categoria"), valores.get("descricao"), valores.get("valor"),
                 valores.get("data"), ja_pago=valores.get("ja_pago") == "1",
                 data_pagamento=valores.get("data_pagamento"),
+                usuario_id=g.usuario.id,  # RN67
             )
         except ErroDeNegocio as erro:
             flash(str(erro), "danger")

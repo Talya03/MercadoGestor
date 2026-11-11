@@ -159,7 +159,7 @@ def _validar_pagamento(forma, valor_recebido, total):
 
 
 # ----------------------------------------------------------------- gravação
-def finalizar(itens, desconto, forma_pagamento, valor_recebido=None, token_envio=None):
+def finalizar(itens, desconto, forma_pagamento, valor_recebido=None, token_envio=None, usuario_id=None):
     """Registra a venda inteira de forma atômica (RN19 a RN27). Devolve a Venda.
 
     Tudo acontece em UMA transação: a venda, os itens, o pagamento e as
@@ -188,6 +188,7 @@ def finalizar(itens, desconto, forma_pagamento, valor_recebido=None, token_envio
             desconto=resumo.desconto,
             total=resumo.total,
             token_envio=token_envio or None,
+            usuario_id=usuario_id,  # RN67: o operador do caixa
         )
         db.session.add(venda)
         db.session.flush()  # gera o número da venda para usar no motivo da baixa
@@ -205,7 +206,8 @@ def finalizar(itens, desconto, forma_pagamento, valor_recebido=None, token_envio
             )
             try:
                 estoque_service.saida(
-                    linha.produto.id, linha.quantidade, f"Venda #{venda.id}", confirmar=False
+                    linha.produto.id, linha.quantidade, f"Venda #{venda.id}", confirmar=False,
+                    usuario_id=usuario_id,
                 )
             except ErroDeNegocio as erro:
                 raise ErroDeNegocio(f"{linha.produto.nome}: {erro}")
@@ -244,6 +246,7 @@ def buscar_venda(venda_id):
         .options(
             joinedload(Venda.itens).joinedload(ItemVenda.produto),
             joinedload(Venda.pagamentos),
+            joinedload(Venda.usuario),
         )
         .where(Venda.id == venda_id)
     )
@@ -259,7 +262,7 @@ def listar_vendas(data_inicio=None, data_fim=None, limite=LIMITE_LISTAGEM):
         raise ErroDeNegocio("A data inicial não pode ser posterior à data final.")
     consulta = (
         select(Venda)
-        .options(joinedload(Venda.pagamentos))
+        .options(joinedload(Venda.pagamentos), joinedload(Venda.usuario))
         .order_by(Venda.data_hora.desc(), Venda.id.desc())
         .limit(limite)
     )

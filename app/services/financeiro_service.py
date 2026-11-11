@@ -24,6 +24,7 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
 from sqlalchemy import func, select
+from sqlalchemy.orm import joinedload
 
 from app.extensions import db
 from app.models import CATEGORIA_MERCADORIA, CATEGORIAS, Compra, ItemVenda, Lancamento, Venda
@@ -75,7 +76,7 @@ def _buscar(lancamento_id):
 
 
 # ------------------------------------------------------------------- escrita
-def criar(tipo, categoria, descricao, valor, data, ja_pago=False, data_pagamento=None):
+def criar(tipo, categoria, descricao, valor, data, ja_pago=False, data_pagamento=None, usuario_id=None):
     """Cria uma despesa/receita avulsa (RN40, RN41).
 
     `data`: vencimento da despesa ou data da receita.
@@ -107,7 +108,7 @@ def criar(tipo, categoria, descricao, valor, data, ja_pago=False, data_pagamento
 
     lancamento = Lancamento(
         tipo=tipo, categoria=categoria, descricao=descricao, valor=valor,
-        vencimento=vencimento, pago_em=pago_em,
+        vencimento=vencimento, pago_em=pago_em, usuario_id=usuario_id,  # RN67
     )
     db.session.add(lancamento)
     db.session.commit()
@@ -185,6 +186,7 @@ def listar(status="pendentes", tipo=None, data_inicio=None, data_fim=None, limit
         raise ErroDeNegocio("A data inicial não pode ser posterior à data final.")
     consulta = (
         select(Lancamento)
+        .options(joinedload(Lancamento.usuario))
         .where(Lancamento.cancelado.is_(False))
         .order_by(Lancamento.vencimento, Lancamento.id)
         .limit(limite)

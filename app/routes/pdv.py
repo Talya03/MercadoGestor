@@ -8,7 +8,7 @@ classes WTForms aqui. O token CSRF continua obrigatório em todos os POST.
 import uuid
 from datetime import date, datetime, timezone
 
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for
 
 from app.models import FORMAS_PAGAMENTO
 from app.services import carrinho_service, produto_service, venda_service
@@ -178,6 +178,7 @@ def finalizar():
             request.form.get("forma"),
             request.form.get("valor_recebido"),
             token,
+            usuario_id=g.usuario.id,  # RN67: o operador vem da sessão, nunca do formulário
         )
     except ErroDeNegocio as erro:
         flash(str(erro), "danger")

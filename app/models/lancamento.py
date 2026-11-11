@@ -57,6 +57,9 @@ class Lancamento(db.Model):
     # Conta a pagar gerada por uma compra (no máximo uma por compra).
     compra_id = db.Column(db.Integer, db.ForeignKey("compra.id"), unique=True)
     criado_em = db.Column(db.DateTime, nullable=False, default=_agora)
+    # Quem registrou (auditoria, RN67). Vazio nos registros anteriores à v0.12.
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"))
+    usuario = db.relationship("Usuario")
 
     compra = db.relationship("Compra", back_populates="lancamento")
 

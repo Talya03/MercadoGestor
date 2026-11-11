@@ -23,6 +23,7 @@
       <span>Venda #{{ venda.id }}</span>
       <span>{{ venda.data_hora|data_hora }}</span>
     </div>
+    <div class="small text-muted mb-2">Operador: {{ venda.usuario.nome if venda.usuario else '—' }}</div>
 
     <table class="table table-sm align-middle">
       <thead>
