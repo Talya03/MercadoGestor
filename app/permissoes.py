@@ -12,6 +12,7 @@ PERMISSOES = {
     "relatorios": {"DONO", "GERENTE"},           # relatórios (mostram custo e lucro)
     "financeiro": {"DONO"},                      # contas, receitas, resumo mensal
     "usuarios": {"DONO"},                        # gerir usuários
+    "backup": {"DONO"},                          # fazer/baixar backup (contém TODOS os dados)
 }
 
 # Módulo (blueprint) -> permissão exigida.
@@ -25,6 +26,7 @@ PERMISSAO_DO_MODULO = {
     "relatorios": "relatorios",
     "financeiro": "financeiro",
     "usuarios": "usuarios",
+    "backup": "backup",
 }
 
 # Páginas públicas (sem login).

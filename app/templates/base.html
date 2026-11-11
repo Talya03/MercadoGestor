@@ -94,6 +94,12 @@
              href="{{ url_for('usuarios.lista') }}">Usuários</a>
         </li>
         {% endif %}
+        {% if pode('backup') %}
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'backup' }}"
+             href="{{ url_for('backup.lista') }}">Backup</a>
+        </li>
+        {% endif %}
       </ul>
     </aside>
 

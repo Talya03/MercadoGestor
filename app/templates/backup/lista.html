@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Backup · MercadoGestor{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Backup</h1>
+  <form method="post" action="{{ url_for('backup.criar') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-success" type="submit">Fazer backup agora</button>
+  </form>
+</div>
+
+<div class="alert alert-warning small">
+  O backup contém <strong>todos os dados do mercado e as senhas (criptografadas)</strong>. Guarde-o em local seguro
+  (pen drive ou disco externo) e não envie a ninguém. Um backup que fica só no mesmo computador não protege
+  contra perda do computador.
+</div>
+
+<div class="card"><div class="table-responsive">
+  <table class="table table-hover align-middle mb-0">
+    <thead class="table-light"><tr><th>Arquivo</th><th>Data e hora</th><th class="text-end">Tamanho</th><th class="text-end">Ações</th></tr></thead>
+    <tbody>
+      {% for b in backups %}
+      <tr>
+        <td><code>{{ b.nome }}</code></td>
+        <td class="text-nowrap">{{ b.quando.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+        <td class="text-end text-muted">{{ '%.0f'|format(b.tamanho / 1024) }} KB</td>
+        <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('backup.baixar', nome=b.nome) }}">Baixar</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="text-center text-muted py-4">Nenhum backup ainda. Clique em "Fazer backup agora".</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+<p class="text-muted small mt-2">Ficam guardados os {{ config.get('BACKUP_MANTER', 14) }} backups mais recentes.
+Para restaurar um backup, veja <code>docs/08-backup-restauracao.md</code>.</p>
+{% endblock %}

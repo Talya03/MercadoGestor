@@ -105,10 +105,11 @@ PAGINAS = {
     "relatorios": ["/relatorios/", "/relatorios/produtos", "/relatorios/dias?formato=csv"],
     "financeiro": ["/financeiro/", "/financeiro/resumo", "/financeiro/novo"],
     "usuarios": ["/usuarios/", "/usuarios/novo"],
+    "backup": ["/backup/"],
 }
 PERMISSAO_DA_PAGINA = {
     "pdv": "vender", "catalogo": "catalogo", "comprar": "comprar",
-    "relatorios": "relatorios", "financeiro": "financeiro", "usuarios": "usuarios",
+    "relatorios": "relatorios", "financeiro": "financeiro", "usuarios": "usuarios", "backup": "backup",
 }
 
 
@@ -132,6 +133,7 @@ def test_inicio_e_troca_de_senha_abrem_para_todos(cliente_como, perfil):
 def test_perfis_do_projeto_batem_com_a_regra_de_negocio():
     assert PERMISSOES["vender"] == {"DONO", "GERENTE", "CAIXA"}
     assert PERMISSOES["financeiro"] == {"DONO"} and PERMISSOES["usuarios"] == {"DONO"}
+    assert PERMISSOES["backup"] == {"DONO"}  # o backup contém todos os dados e os hashes das senhas
     assert "CAIXA" not in PERMISSOES["catalogo"] | PERMISSOES["comprar"] | PERMISSOES["relatorios"]
     assert "GERENTE" in PERMISSOES["catalogo"] and "GERENTE" not in PERMISSOES["financeiro"]
 
@@ -185,7 +187,7 @@ def test_menu_so_mostra_o_que_o_perfil_abre(cliente_como):
         "GERENTE": {"PDV (caixa)", "Vendas", "Categorias", "Produtos", "Estoque", "Fornecedores", "Compras", "Relatórios"},
     }
     todos = {"PDV (caixa)", "Vendas", "Categorias", "Produtos", "Estoque", "Fornecedores", "Compras",
-             "Financeiro", "Resumo mensal", "Relatórios", "Usuários"}
+             "Financeiro", "Resumo mensal", "Relatórios", "Usuários", "Backup"}
     for perfil, visivel in esperado.items():
         menu = re.findall(r'class="nav-link[^"]*"\s+href="[^"]+">([^<]+)</a>', html(cliente_como(perfil).get("/")))
         assert set(menu) - {"Início"} == visivel, perfil

@@ -45,6 +45,7 @@ def create_app(config_class=Config, instance_path=None):
     from app import models  # noqa: F401  (registra os modelos no SQLAlchemy)
     from app import seguranca
     from app.routes.auth import auth_bp
+    from app.routes.backup import backup_bp
     from app.routes.categorias import categorias_bp
     from app.routes.compras import compras_bp
     from app.routes.estoque import estoque_bp
@@ -71,6 +72,7 @@ def create_app(config_class=Config, instance_path=None):
     app.register_blueprint(financeiro_bp)
     app.register_blueprint(relatorios_bp)
     app.register_blueprint(usuarios_bp)
+    app.register_blueprint(backup_bp)
 
     # Filtros usados nos templates: {{ preco|moeda }}, {{ saldo|quantidade }}
     app.add_template_filter(moeda, "moeda")

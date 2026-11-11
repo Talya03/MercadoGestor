@@ -29,6 +29,10 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Backups (Fase 9): pasta padrão = instance/backups; quantos manter.
+    BACKUP_DIR = os.environ.get("BACKUP_DIR")
+    BACKUP_MANTER = int(os.environ.get("BACKUP_MANTER", "14"))
+
     # Desconto máximo (em % do total da venda) que o caixa pode dar.
     # Quando existirem perfis de usuário (Fase 8), o administrador poderá ter outro limite.
     DESCONTO_MAXIMO_PERCENTUAL = Decimal(os.environ.get("DESCONTO_MAXIMO_PERCENTUAL", "10"))

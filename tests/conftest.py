@@ -19,8 +19,9 @@ SENHA_TESTE = "senha-de-teste-123"
 
 
 @pytest.fixture
-def app():
+def app(tmp_path):
     app = create_app(TestConfig)
+    app.config["BACKUP_DIR"] = str(tmp_path / "backups")  # nunca tocar na pasta real instance/
     with app.app_context():
         db.create_all()
         yield app
