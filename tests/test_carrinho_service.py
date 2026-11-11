@@ -156,7 +156,7 @@ def test_remove_item_e_ignora_item_ausente(leite, tomate):
     assert carrinho.ler(sessao) == {tomate.id: Decimal("1")}
 
 
-# -------------------------------------------------- dado corrompido na sessão
+# ------------------------------------------------ dado corrompido na sessão
 def test_leitura_ignora_dados_invalidos_da_sessao():
     sessao = {
         carrinho.CHAVE_CARRINHO: {

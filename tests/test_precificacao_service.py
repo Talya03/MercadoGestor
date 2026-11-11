@@ -16,7 +16,7 @@ _n = count(1)
 def novo(custo="7,00", venda="10,00", **extras):
     cat = categoria_service.listar()[0] if categoria_service.listar() else categoria_service.criar("Mercearia")
     dados = {"categoria_id": cat.id, "nome": f"Produto {next(_n)}", "codigo": f"C{next(_n)}",
-             "unidade_medida": "UN", "preco_custo": custo, "preco_venda": venda, "estoque_minimo": "1"}
+                "unidade_medida": "UN", "preco_custo": custo, "preco_venda": venda, "estoque_minimo": "1"}
     dados.update(extras)
     return produto_service.criar(dados)
 
@@ -64,8 +64,8 @@ def test_sem_custo_nao_ha_sugestao_nem_markup():  # RN79
 
 # ------------------------------------------------------------- parâmetros
 @pytest.mark.parametrize("margem,despesas", [("-1", "0"), ("30", "-5"), ("100", "0"), ("60", "40"),
-                                             ("99,99", "0,01"), ("abc", "0"), ("", "0"), ("30", ""),
-                                             ("1e2", "0"), ("NaN", "0"), ("30,123", "0")])
+                                                ("99,99", "0,01"), ("abc", "0"), ("", "0"), ("30", ""),
+                                                ("1e2", "0"), ("NaN", "0"), ("30,123", "0")])
 def test_parametros_invalidos_sao_recusados(margem, despesas):  # RN78
     with pytest.raises(ErroDeNegocio):
         svc.validar_parametros(margem, despesas)

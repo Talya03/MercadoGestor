@@ -120,3 +120,4 @@ def test_busca_ignora_caixa_e_funciona_no_meio_do_nome(app):
     assert [c.nome for c in service.listar("LATIC")] == ["Laticínios"]
     assert [c.nome for c in service.listar("lim")] == ["Limpeza"]
     assert service.listar("xyz") == []
+

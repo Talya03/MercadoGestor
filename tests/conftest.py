@@ -6,7 +6,7 @@ Aqui criamos uma aplicação com banco em memória, nova a cada teste.
 Desde a Fase 8 todo o sistema exige login. Por isso:
 - `client` já vem logado como DONO (os testes de telas continuam focados na regra que testam);
 - `client_anonimo` não tem login (para testar o próprio login e a proteção);
-- `cliente_como("CAIXA")` entra com um perfil específico (para testar permissões).
+- `cliente_como("CAIXA")` entra com um perfil específico (para testar permissões)
 """
 import pytest
 
@@ -76,3 +76,4 @@ def cliente_como(app):
         entrar(cliente, perfil, login=f"{perfil.lower()}-teste")
         return cliente
     return criar
+
